@@ -83,6 +83,15 @@ def get_tls_config() -> tuple[bool, str | None]:
     return verify, bundle
 
 
+def ensure_config() -> None:
+    """Create config directory and empty config file if they do not exist yet."""
+    path = get_config_path()
+    if path.exists():
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("{}\n")
+
+
 def write_config(updates: dict[str, Any]) -> None:
     """Merge updates into config file and write. Creates parent directory and file if needed."""
     path = get_config_path()

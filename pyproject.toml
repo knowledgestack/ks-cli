@@ -3,7 +3,11 @@ name = "kscli"
 version = "1.0.1"
 description = "Add your description here"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12"
+authors = [{ name = "Knowledge Stack", email = "support@knowledgestack.com" }]
+urls = { Repository = "https://github.com/knowledgestack/ks-cli" }
+
 dependencies = [
     "certifi>=2026.1.4",
     "click>=8.3.1",
@@ -24,7 +28,12 @@ build-backend = "hatchling.build"
 packages = ["src/kscli"]
 
 [dependency-groups]
-dev = ["basedpyright>=1.38.1", "pytest>=9.0.2", "ruff>=0.15.2"]
+dev = [
+    "basedpyright>=1.38.1",
+    "pytest>=9.0.2",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.15.2",
+]
 
 # Pyright configuration - strict type checking
 [tool.basedpyright]
@@ -50,3 +59,7 @@ reportMissingTypeArgument = "error"
 reportAny = "none"
 reportMissingImports = "error"
 reportMissingTypeStubs = "error"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["e2e: end-to-end tests requiring a running backend"]

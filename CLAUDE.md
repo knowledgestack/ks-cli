@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`ks-cli` (kscli) is a CLI tool for the Knowledge Stack platform. It wraps the auto-generated `ksapi` Python SDK with a Click-based command interface using a **verb-first routing pattern** (e.g. `kscli get folders`, `kscli describe document <id>`, `kscli create chunk ...`).
+`ks-cli` (kscli) is a CLI tool for the Knowledge Stack platform. It wraps the auto-generated `ksapi` Python SDK with a Click-based command interface using a **resource-first routing pattern** (e.g. `kscli folders list`, `kscli folders describe <id>`, `kscli chunks create ...`).
 
 ## Commands
 
@@ -34,17 +34,19 @@ make pre-commit
 
 ## Architecture
 
-### Verb-first CLI routing (`src/kscli/cli.py`)
+### Resource-first CLI routing (`src/kscli/cli.py`)
 
-The CLI uses verb groups (`get`, `describe`, `create`, `update`, `delete`, `search`, `ingest`, `attach`, `detach`, `accept`, `action`) as top-level subcommands. Each resource module registers its commands onto these verb groups via `register_<verb>(group)` functions — e.g. `folders.register_get(get)` adds the `folders` subcommand to `kscli get`. This is wired up in `cli.py`.
+The CLI uses resource groups as top-level subcommands (e.g. `folders`, `documents`, `chunks`, `tags`). Each resource module defines a `@click.group()` with verb subcommands — e.g. `kscli folders list`, `kscli folders describe <id>`, `kscli folders create`. The groups are registered in `cli.py` via `main.add_command(resource_group)`.
 
-Top-level commands outside verb groups: `assume-user`, `whoami`, `settings`.
+Top-level commands outside resource groups: `assume-user`, `whoami`, `settings`.
+
+Resource groups: `folders`, `documents`, `document-versions`, `sections`, `chunks`, `tags`, `workflows`, `tenants`, `users`, `permissions`, `invites`, `threads`, `thread-messages`, `chunk-lineages`, `path-parts`.
 
 ### Resource command modules (`src/kscli/commands/`)
 
 Each resource (folders, documents, chunks, etc.) follows the same pattern:
-- Define a `register_<verb>(group)` function per supported CRUD verb
-- Inside each register function, define the Click command with `@group.command("resource-name")`
+- Define a `@click.group("resource-name")` at module level
+- Add verb subcommands via `@group.command("verb")` (e.g. `list`, `describe`, `create`, `update`, `delete`)
 - Use `get_api_client(ctx)` to get an authenticated `ksapi.ApiClient`
 - Wrap API calls in `with handle_client_errors():`
 - Pass results through `to_dict(result)` → `print_result(ctx, data, columns=COLUMNS)`
@@ -63,7 +65,7 @@ JWT-based auth via admin impersonation. `assume_user()` calls `/v1/auth/assume_u
 
 Layered config resolution: environment variables → config file (`~/.config/kscli/config.json`) → defaults. Key env vars: `KSCLI_BASE_URL`, `ADMIN_API_KEY`, `KSCLI_FORMAT`, `KSCLI_VERIFY_SSL`, `KSCLI_CA_BUNDLE`, `KSCLI_CONFIG`, `KSCLI_CREDENTIALS_PATH`.
 
-Environment presets: `local` (localhost:8000), `dev` (api-staging.knowledgestack.ai), `prod` (api.knowledgestack.ai) — set via `kscli settings environment <name>`.
+Environment presets: `local` (localhost:8000), `prod` (api.knowledgestack.ai) — set via `kscli settings environment <name>`.
 
 ### Output formatting (`src/kscli/output.py`)
 
