@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-02-22)
+
+### Features
+
+- Complete release process ([#1](https://github.com/knowledgestack/ks-cli/pull/1),
+  [`513b295`](https://github.com/knowledgestack/ks-cli/commit/513b2956caa57c3d1e68c3003fea4f6e13ee13c1))
+
+
 ## v1.0.1 (2026-02-22)
 
 ### Bug Fixes
