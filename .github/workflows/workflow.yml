@@ -109,7 +109,7 @@ jobs:
 
           echo "Waiting for API..."
           for i in $(seq 1 120); do
-            if curl -sf http://localhost:28000/health > /dev/null 2>&1; then
+            if curl -sf http://localhost:28000/healthz > /dev/null 2>&1; then
               echo "API is ready"
               break
             fi
