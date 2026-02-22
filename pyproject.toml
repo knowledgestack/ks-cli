@@ -5,6 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
+authors = [{ name = "Knowledge Stack", email = "support@knowledgestack.com" }]
+urls = { Repository = "https://github.com/knowledgestack/ks-cli" }
+
 dependencies = [
     "certifi>=2026.1.4",
     "click>=8.3.1",
