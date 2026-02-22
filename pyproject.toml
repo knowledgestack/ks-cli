@@ -1,7 +1,7 @@
 [project]
 name = "kscli"
-version = "0.1.0"
-description = "CLI tool for the Knowledge Stack platform — manage folders, documents, chunks, and more from your terminal"
+version = "1.0.1"
+description = "Add your description here"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
@@ -59,6 +59,4 @@ reportMissingTypeStubs = "error"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = [
-    "e2e: end-to-end tests requiring a running backend",
-]
+markers = ["e2e: end-to-end tests requiring a running backend"]
