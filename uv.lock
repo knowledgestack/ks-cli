@@ -122,8 +122,23 @@ wheels = [
 ]
 
 [[package]]
-name = "ks-cli"
-version = "1.0.0"
+name = "ksapi"
+version = "1.25.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "python-dateutil" },
+    { name = "typing-extensions" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/51/6b/f57684e2699ee21c89c905bf7aba1b89740d74b7091167b2f9d32a9d209c/ksapi-1.25.0.tar.gz", hash = "sha256:f67b73998fc3b6ea1149c8d724bd6044b5fec28ae051bb385f505f2259a075f5", size = 111997, upload-time = "2026-02-21T14:42:02.349Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/92/f1/0f2f76ca6909e28acb77941083a34342d2625828e44fba4e10970d2c07e4/ksapi-1.25.0-py3-none-any.whl", hash = "sha256:a6d2480897b7c8658335849e82245ddac908ae781ade137a3a1ce113824f9b29", size = 229551, upload-time = "2026-02-21T14:42:01.261Z" },
+]
+
+[[package]]
+name = "kscli"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "certifi" },
@@ -156,21 +171,6 @@ dev = [
     { name = "basedpyright", specifier = ">=1.38.1" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "ruff", specifier = ">=0.15.2" },
-]
-
-[[package]]
-name = "ksapi"
-version = "1.25.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-    { name = "python-dateutil" },
-    { name = "typing-extensions" },
-    { name = "urllib3" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/51/6b/f57684e2699ee21c89c905bf7aba1b89740d74b7091167b2f9d32a9d209c/ksapi-1.25.0.tar.gz", hash = "sha256:f67b73998fc3b6ea1149c8d724bd6044b5fec28ae051bb385f505f2259a075f5", size = 111997, upload-time = "2026-02-21T14:42:02.349Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/f1/0f2f76ca6909e28acb77941083a34342d2625828e44fba4e10970d2c07e4/ksapi-1.25.0-py3-none-any.whl", hash = "sha256:a6d2480897b7c8658335849e82245ddac908ae781ade137a3a1ce113824f9b29", size = 229551, upload-time = "2026-02-21T14:42:01.261Z" },
 ]
 
 [[package]]

@@ -104,10 +104,21 @@ jobs:
           echo "Current semantic release tag=${NEW_TAG}"
           echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
+      - name: Check for build artifacts
+        id: check-dist
+        run: |
+          if ls dist/*.whl dist/*.tar.gz 1>/dev/null 2>&1; then
+            echo "has_dist=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_dist=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish to Test PyPI
+        if: steps.check-dist.outputs.has_dist == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
       # - name: Publish to PyPI
+      #   if: steps.check-dist.outputs.has_dist == 'true'
       #   uses: pypa/gh-action-pypi-publish@release/v1
