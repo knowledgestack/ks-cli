@@ -1,0 +1,87 @@
+[semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+build_command = "uv lock && git add uv.lock && uv build"
+commit_message = "chore(release): v{version}"
+commit_parser = "conventional"
+logging_use_named_masks = false
+major_on_zero = true
+allow_zero_version = false
+no_git_verify = false
+tag_format = "v{version}"
+add_partial_tags = false
+
+[semantic_release.branches.main]
+match = "(main)"
+
+[semantic_release.changelog]
+changelog_file = ""
+mode = "update"
+template_dir = "templates"
+# Recommended patterns for conventional commits parser that is scope aware
+exclude_commit_patterns = [
+    '''chore(?:\([^)]*?\))?: .+''',
+    '''ci(?:\([^)]*?\))?: .+''',
+    '''refactor(?:\([^)]*?\))?: .+''',
+    '''style(?:\([^)]*?\))?: .+''',
+    '''test(?:\([^)]*?\))?: .+''',
+    '''build\((?!deps\): .+)''',
+    '''Initial [Cc]ommit.*''',
+]
+
+
+[semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
+output_format = "md"
+mask_initial_release = true
+
+[semantic_release.changelog.environment]
+block_start_string = "{%"
+block_end_string = "%}"
+variable_start_string = "{{"
+variable_end_string = "}}"
+comment_start_string = "{#"
+comment_end_string = "#}"
+trim_blocks = false
+lstrip_blocks = false
+newline_sequence = "\n"
+keep_trailing_newline = false
+extensions = []
+autoescape = false
+
+[semantic_release.commit_author]
+env = "GIT_COMMIT_AUTHOR"
+default = "semantic-release <semantic-release>"
+
+[semantic_release.commit_parser_options]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+other_allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "style",
+    "refactor",
+    "test",
+]
+allowed_tags = [
+    "feat",
+    "fix",
+    "perf",
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "style",
+    "refactor",
+    "test",
+]
+default_bump_level = 0
+parse_squash_commits = true
+ignore_merge_commits = true
+
+[semantic_release.remote]
+name = "origin"
+type = "github"
+ignore_token_for_push = false
+insecure = false

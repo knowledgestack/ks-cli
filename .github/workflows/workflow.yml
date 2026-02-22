@@ -1,0 +1,113 @@
+name: Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || !startsWith(github.event.head_commit.message, 'chore(release):')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Cache virtual environment
+        uses: actions/cache@v4
+        id: cache-venv
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+
+      - name: Install dev dependencies
+        run: uv sync --all-extras --group dev
+
+      - name: Run ruff check
+        run: make lint
+
+      - name: Run type checker
+        run: make typecheck
+
+  release:
+    runs-on: ubuntu-latest
+    environment: "production"
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    needs: [lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Generate release token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_GH_APP_ID }}
+          private-key: ${{ secrets.RELEASE_GH_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup | Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dev dependencies
+        run: uv sync
+
+      - name: Get current version
+        id: current-version
+        run: |
+          REPO_VERSION=$(uv version --short)
+          echo "Detected current version=${REPO_VERSION}"
+          echo "prevtag=v${REPO_VERSION}" >> $GITHUB_OUTPUT
+
+      # Don't use the official python-semantic-release action because it's too slow
+      - name: Run semantic-release
+        id: semantic-release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }} # For release publishing
+        run: |
+          uvx python-semantic-release -c semantic_release.toml version --vcs-release --changelog
+          NEW_TAG=$(uvx python-semantic-release -c semantic_release.toml version --print-tag)
+          echo "Current semantic release tag=${NEW_TAG}"
+          echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Publish to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      # - name: Publish to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1

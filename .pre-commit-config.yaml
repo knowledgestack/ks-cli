@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint_fix
+        name: ruff check --fix
+        entry: make fix
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: typecheck
+        name: basedpyright typecheck
+        entry: make typecheck
+        language: system
+        pass_filenames: false
+        always_run: true

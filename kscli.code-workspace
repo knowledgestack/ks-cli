@@ -1,0 +1,93 @@
+{
+  "folders": [
+    {
+      "name": "KS-CLI",
+      "path": "./"
+    },
+  ],
+  "settings": {
+    // File exclusions
+    "files.watcherExclude": {
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/.coverage": true,
+      "**/*_cache/**": true,
+      "**/htmlcov": true,
+      "**/*.egg-info": true
+    },
+    "files.exclude": {
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/.coverage": true,
+      "**/*_cache/**": true,
+      "**/htmlcov": true,
+      "**/*.egg-info": true
+    },
+    "search.exclude": {
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/.coverage": true,
+      "**/*_cache/**": true,
+      "**/htmlcov": true,
+      "**/*.egg-info": true
+    },
+    // Python - Global
+    "python.languageServer": "None",
+    "python.terminal.activateEnvironment": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+      "tests",
+      "-v",
+      "--capture=tee-sys",
+      "--tb=short",
+      "--no-cov"
+    ],
+    "python.testing.cwd": "${workspaceFolder:Backend}",
+    // Editor
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.rulers": [
+      88
+    ],
+    // Python formatting
+    "[python]": {
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.organizeImports.ruff": "explicit",
+        "source.fixAll.ruff": "explicit"
+      }
+    },
+    // Ruff
+    "ruff.path": [
+      "uv",
+      "run",
+      "ruff"
+    ],
+    "ruff.configurationPreference": "filesystemFirst",
+    "ruff.organizeImports": true,
+    "ruff.fixAll": true,
+    // Pyright - configure paths for backend source code
+    "cursorpyright.analysis.autoImportCompletions": true,
+    "cursorpyright.analysis.autoSearchPaths": true,
+    "cursorpyright.analysis.diagnosticMode": "workspace",
+    "cursorpyright.importStrategy": "useBundled",
+    "cursorpyright.analysis.extraPaths": [
+      "${workspaceFolder:Backend}/src",
+      "${workspaceFolder:Backend}/tests",
+    ],
+    "cursorpyright.analysis.typeCheckingMode": "recommended",
+    "cursorpyright.analysis.useLibraryCodeForTypes": true,
+    "python.defaultInterpreterPath": "${workspaceFolder:Backend}/.venv/bin/python"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "charliermarsh.ruff",
+      "redhat.vscode-yaml",
+      "tamasfe.even-better-toml",
+      "bradlc.vscode-tailwindcss"
+    ],
+  }
+}
