@@ -24,5 +24,13 @@ lint: ## Run the linter
 typecheck: ## Run the type checker
 	@uv run basedpyright --stats
 
+.PHONY: test
+test: ## Run unit tests
+	@uv run pytest tests/ -v --ignore=tests/e2e
+
+.PHONY: e2e-test
+e2e-test: ## Run e2e tests (requires running backend)
+	@uv run pytest tests/e2e/ -v -m e2e -n 2
+
 .PHONY: pre-commit
 pre-commit: lint typecheck test ## Run linting, typechecking, and tests

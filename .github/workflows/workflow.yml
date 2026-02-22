@@ -45,13 +45,100 @@ jobs:
       - name: Run type checker
         run: make typecheck
 
+  e2e:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || !startsWith(github.event.head_commit.message, 'chore(release):')
+    steps:
+      - name: Generate GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_GH_APP_ID }}
+          private-key: ${{ secrets.RELEASE_GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ks-backend
+
+      - name: Checkout ks-cli
+        uses: actions/checkout@v6
+        with:
+          path: ks-cli
+
+      - name: Checkout ks-backend
+        uses: actions/checkout@v6
+        with:
+          repository: knowledgestack/ks-backend
+          token: ${{ steps.app-token.outputs.token }}
+          path: ks-backend
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: |
+            ks-backend/uv.lock
+            ks-cli/uv.lock
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install ks-backend dependencies
+        working-directory: ks-backend
+        run: make install-dev
+
+      - name: Start e2e stack
+        working-directory: ks-backend
+        run: make e2e-stack
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          for i in $(seq 1 120); do
+            if pg_isready -h localhost -p 15432 -U postgres 2>/dev/null; then
+              echo "PostgreSQL is ready"
+              break
+            fi
+            if [ $i -eq 120 ]; then
+              echo "Timed out waiting for PostgreSQL"
+              exit 1
+            fi
+            sleep 1
+          done
+
+          echo "Waiting for API..."
+          for i in $(seq 1 120); do
+            if curl -sf http://localhost:28000/health > /dev/null 2>&1; then
+              echo "API is ready"
+              break
+            fi
+            if [ $i -eq 120 ]; then
+              echo "Timed out waiting for API"
+              exit 1
+            fi
+            sleep 1
+          done
+
+      - name: Seed database
+        working-directory: ks-backend
+        run: make e2e-prep
+
+      - name: Install ks-cli dependencies
+        working-directory: ks-cli
+        run: uv sync --all-extras --group dev
+
+      - name: Run e2e tests
+        working-directory: ks-cli
+        run: make e2e-test
+
   release:
     runs-on: ubuntu-latest
     environment: "production"
     concurrency:
       group: release
       cancel-in-progress: false
-    needs: [lint]
+    needs: [lint, e2e]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write

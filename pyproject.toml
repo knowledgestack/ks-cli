@@ -24,7 +24,12 @@ build-backend = "hatchling.build"
 packages = ["src/kscli"]
 
 [dependency-groups]
-dev = ["basedpyright>=1.38.1", "pytest>=9.0.2", "ruff>=0.15.2"]
+dev = [
+    "basedpyright>=1.38.1",
+    "pytest>=9.0.2",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.15.2",
+]
 
 # Pyright configuration - strict type checking
 [tool.basedpyright]
@@ -50,3 +55,9 @@ reportMissingTypeArgument = "error"
 reportAny = "none"
 reportMissingImports = "error"
 reportMissingTypeStubs = "error"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "e2e: end-to-end tests requiring a running backend",
+]
