@@ -88,37 +88,12 @@ jobs:
         working-directory: ks-backend
         run: make install-dev
 
+      - name: Create shared email directory
+        run: mkdir -p /tmp/ks/e2e-testing/emails && chmod 777 /tmp/ks/e2e-testing/emails
+
       - name: Start e2e stack
         working-directory: ks-backend
         run: make e2e-stack
-
-      - name: Wait for services
-        run: |
-          echo "Waiting for PostgreSQL..."
-          for i in $(seq 1 120); do
-            if pg_isready -h localhost -p 15432 -U postgres 2>/dev/null; then
-              echo "PostgreSQL is ready"
-              break
-            fi
-            if [ $i -eq 120 ]; then
-              echo "Timed out waiting for PostgreSQL"
-              exit 1
-            fi
-            sleep 1
-          done
-
-          echo "Waiting for API..."
-          for i in $(seq 1 120); do
-            if curl -sf http://localhost:28000/healthz > /dev/null 2>&1; then
-              echo "API is ready"
-              break
-            fi
-            if [ $i -eq 120 ]; then
-              echo "Timed out waiting for API"
-              exit 1
-            fi
-            sleep 1
-          done
 
       - name: Seed database
         working-directory: ks-backend
@@ -200,12 +175,6 @@ jobs:
             echo "has_dist=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Publish to Test PyPI
+      - name: Publish to PyPI
         if: steps.check-dist.outputs.has_dist == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
-      # - name: Publish to PyPI
-      #   if: steps.check-dist.outputs.has_dist == 'true'
-      #   uses: pypa/gh-action-pypi-publish@release/v1

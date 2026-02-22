@@ -28,8 +28,21 @@ typecheck: ## Run the type checker
 test: ## Run unit tests
 	@uv run pytest tests/ -v --ignore=tests/e2e
 
+.PHONY: wait-for-api
+wait-for-api: ## Wait for the e2e API to be ready
+	@echo "Waiting for API at http://localhost:28000..."
+	@for i in $$(seq 1 120); do \
+		if curl -sf http://localhost:28000/healthz > /dev/null 2>&1; then \
+			echo "API is ready"; \
+			exit 0; \
+		fi; \
+		sleep 1; \
+	done; \
+	echo "Timed out waiting for API after 120s"; \
+	exit 1
+
 .PHONY: e2e-test
-e2e-test: ## Run e2e tests (requires running backend)
+e2e-test: wait-for-api ## Run e2e tests (requires running backend)
 	@uv run pytest tests/e2e/ -v -m e2e -n 2
 
 .PHONY: pre-commit
