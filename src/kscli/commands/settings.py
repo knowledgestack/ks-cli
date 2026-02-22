@@ -20,11 +20,6 @@ _ENV_PRESETS: dict[str, dict[str, object]] = {
         "base_url": "http://localhost:8000",
         "verify_ssl": False,
     },
-    "dev": {
-        "environment": "dev",
-        "base_url": "https://api-staging.knowledgestack.ai",
-        "verify_ssl": True,
-    },
     "prod": {
         "environment": "prod",
         "base_url": "https://api.knowledgestack.ai",
@@ -39,14 +34,14 @@ def settings():
 
 
 @settings.command("environment")
-@click.argument("env_name", type=click.Choice(["local", "dev", "prod"]))
+@click.argument("env_name", type=click.Choice(["local", "prod"]))
 @click.option(
     "--base-url",
     default=None,
     help="Override default API base URL for the selected environment",
 )
 def environment(env_name: str, base_url: str | None) -> None:
-    """Set the environment (local, dev, prod) and associated config."""
+    """Set the environment (local, prod) and associated config."""
     preset = _ENV_PRESETS[env_name].copy()
     if base_url:
         preset["base_url"] = base_url

@@ -12,7 +12,7 @@ E2E tests exercise the full CLI surface by running `kscli` as a subprocess again
   └── ks-backend/
   ```
 
-  The test fixtures resolve the backend path via `Path(__file__).resolve().parents[3] / "ks-backend"` (`tests/e2e/conftest.py:21`).
+  The test fixtures resolve the backend path relative to the test file location (`tests/e2e/conftest.py:21`).
 
 - **Docker** running (for the backend's postgres + API containers)
 
@@ -160,12 +160,6 @@ class TestCliFoldersWrite:
 
 ## CI Integration
 
-The e2e tests run automatically in GitHub Actions on every PR and push to main. The CI workflow (`.github/workflows/workflow.yml:48-108`):
+The e2e tests run automatically in GitHub Actions on every PR and push to main. The CI workflow checks out both repositories side by side, starts the backend Docker stack, seeds the database, and runs `make e2e-test`. See [docs/ci.md](ci.md) for pipeline details.
 
-1. Checks out both `ks-cli` and `ks-backend` side by side
-2. Installs backend dependencies and starts the Docker stack (`make e2e-stack`)
-3. Creates the email directory (`/tmp/ks/e2e-testing/emails`)
-4. Seeds the database (`make e2e-prep`)
-5. Installs CLI dependencies and runs `make e2e-test`
-
-The `release` job is gated on both `lint` and `e2e` passing (`workflow.yml:116`).
+The `release` job is gated on both `lint` and `e2e` passing.

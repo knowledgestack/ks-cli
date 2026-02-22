@@ -1,8 +1,9 @@
 [project]
 name = "kscli"
 version = "0.1.0"
-description = "Add your description here"
+description = "CLI tool for the Knowledge Stack platform — manage folders, documents, chunks, and more from your terminal"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
     "certifi>=2026.1.4",

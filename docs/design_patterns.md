@@ -93,7 +93,7 @@ Configuration in `src/kscli/config.py` follows a strict precedence chain: **CLI 
 
 This is implemented per-setting — each getter function (`get_base_url`, `get_default_format`, `get_tls_config`) checks the sources in order. See [configuration.md](configuration.md) for the full reference.
 
-Environment presets (`local`, `dev`, `prod`) bundle multiple settings together and are persisted to the config file via `kscli settings environment <name>` (`src/kscli/commands/settings.py:17-33`).
+Environment presets (`local`, `prod`) bundle multiple settings together and are persisted to the config file via `kscli settings environment <name>` (`src/kscli/commands/settings.py:17-28`).
 
 ## Auto-Refreshing Credential Cache
 

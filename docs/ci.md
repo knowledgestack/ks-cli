@@ -50,7 +50,7 @@ Runs in parallel with `lint`. Spins up the full ks-backend stack and runs CLI e2
 
 ```
 ├── ks-cli/       # this repo
-└── ks-backend/   # private repo, checked out via GitHub App token
+└── ks-backend/   # checked out via GitHub App token
 ```
 
 This layout matches the path resolution in `tests/e2e/conftest.py:21`:
@@ -91,15 +91,7 @@ Runs **only** on pushes to `main`, gated on both `lint` and `e2e` passing (`need
 
 ## Secrets
 
-| Secret | Used By | Purpose |
-|--------|---------|---------|
-| `RELEASE_GH_APP_ID` | All jobs | GitHub App ID for token generation |
-| `RELEASE_GH_APP_PRIVATE_KEY` | All jobs | GitHub App private key |
-
-The GitHub App must have:
-
-- Read access to `knowledgestack/ks-backend` (for e2e checkout)
-- Write access to `knowledgestack/ks-cli` (for releases, tags, commits)
+CI uses a GitHub App for authentication. The required secrets are configured as GitHub repository secrets.
 
 ## Skip Conditions
 

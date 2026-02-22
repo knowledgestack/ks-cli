@@ -65,7 +65,7 @@ JWT-based auth via admin impersonation. `assume_user()` calls `/v1/auth/assume_u
 
 Layered config resolution: environment variables → config file (`~/.config/kscli/config.json`) → defaults. Key env vars: `KSCLI_BASE_URL`, `ADMIN_API_KEY`, `KSCLI_FORMAT`, `KSCLI_VERIFY_SSL`, `KSCLI_CA_BUNDLE`, `KSCLI_CONFIG`, `KSCLI_CREDENTIALS_PATH`.
 
-Environment presets: `local` (localhost:8000), `dev` (api-staging.knowledgestack.ai), `prod` (api.knowledgestack.ai) — set via `kscli settings environment <name>`.
+Environment presets: `local` (localhost:8000), `prod` (api.knowledgestack.ai) — set via `kscli settings environment <name>`.
 
 ### Output formatting (`src/kscli/output.py`)
 

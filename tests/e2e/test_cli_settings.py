@@ -27,14 +27,14 @@ class TestCliSettings:
         )
         assert "local" in result.stdout
 
-    def test_settings_environment_dev(self, cli_authenticated: dict[str, str]) -> None:
-        """Settings environment dev sets the dev preset."""
+    def test_settings_environment_prod(self, cli_authenticated: dict[str, str]) -> None:
+        """Settings environment prod sets the prod preset."""
         result = run_kscli_ok(
-            ["settings", "environment", "dev"],
+            ["settings", "environment", "prod"],
             env=cli_authenticated,
             format_json=False,
         )
-        assert "dev" in result.stdout
+        assert "prod" in result.stdout
 
     def test_settings_environment_resets_to_local(
         self, cli_authenticated: dict[str, str]

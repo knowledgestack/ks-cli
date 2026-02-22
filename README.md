@@ -30,7 +30,6 @@ uv sync --all-extras --group dev
 ```bash
 # Point at a running Knowledge Stack instance
 kscli settings environment local    # http://localhost:8000
-kscli settings environment dev      # https://api-staging.knowledgestack.ai
 kscli settings environment prod     # https://api.knowledgestack.ai
 ```
 
@@ -76,7 +75,7 @@ kscli chunks search --query "quarterly revenue" --folder-id <id>
 |---------|-------------|
 | `assume-user` | Authenticate as a specific user via admin impersonation |
 | `whoami` | Show current authenticated identity |
-| `settings environment <name>` | Set environment preset (local/dev/prod) |
+| `settings environment <name>` | Set environment preset (local/prod) |
 | `settings show` | Print resolved configuration |
 
 ### Resource groups

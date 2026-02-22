@@ -26,8 +26,8 @@ Created automatically on first run (`src/kscli/config.py:86-92`). Example:
 
 ```json
 {
-  "environment": "dev",
-  "base_url": "https://api-staging.knowledgestack.ai",
+  "environment": "prod",
+  "base_url": "https://api.knowledgestack.ai",
   "verify_ssl": true,
   "admin_api_key": "your-admin-key",
   "format": "json",
@@ -60,22 +60,20 @@ The `settings environment` command sets multiple config values at once (`src/ksc
 
 ```bash
 kscli settings environment local   # http://localhost:8000, verify_ssl=false
-kscli settings environment dev     # https://api-staging.knowledgestack.ai, verify_ssl=true
 kscli settings environment prod    # https://api.knowledgestack.ai, verify_ssl=true
 ```
 
 You can override the base URL for a preset:
 
 ```bash
-kscli settings environment dev --base-url https://custom-staging.example.com
+kscli settings environment prod --base-url https://custom.example.com
 ```
 
-Presets write to the config file. The specific values (`src/kscli/commands/settings.py:17-33`):
+Presets write to the config file. The specific values (`src/kscli/commands/settings.py:17-28`):
 
 | Preset | `base_url` | `verify_ssl` |
 |--------|-----------|--------------|
 | `local` | `http://localhost:8000` | `false` |
-| `dev` | `https://api-staging.knowledgestack.ai` | `true` |
 | `prod` | `https://api.knowledgestack.ai` | `true` |
 
 ## Viewing Current Config
@@ -91,11 +89,11 @@ Displays the fully resolved configuration — the merged result of all sources (
 │ Key          │ Value                                        │
 ├──────────────┼──────────────────────────────────────────────┤
 │ config_file  │ /Users/you/.config/kscli/config.json         │
-│ base_url     │ https://api-staging.knowledgestack.ai        │
+│ base_url     │ https://api.knowledgestack.ai                │
 │ verify_ssl   │ True                                         │
 │ ca_bundle    │ (default)                                    │
 │ format       │ table                                        │
-│ environment  │ dev                                          │
+│ environment  │ prod                                         │
 │ admin_api_key│ (set)                                        │
 └──────────────┴──────────────────────────────────────────────┘
 ```
