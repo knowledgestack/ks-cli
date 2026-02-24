@@ -1,13 +1,11 @@
 """E2E test fixtures for kscli CLI tests."""
 
 import secrets
+from collections.abc import Generator  # noqa: TC003
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
-
-if TYPE_CHECKING:
-    from collections.abc import Generator
 
 from tests.e2e.cli_helpers import run_kscli, run_kscli_ok
 

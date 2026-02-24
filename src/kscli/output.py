@@ -201,9 +201,14 @@ def _build_node_label(item: dict[str, Any]) -> str:
     details_text = f" [{', '.join(details)}]" if details else ""
 
     id_parts: list[str] = []
+
+    # Show folder/document ID (prefer metadata_obj_id, fall back to id)
     metadata_obj_id = item.get("metadata_obj_id")
+    item_id = item.get("id")
     if metadata_obj_id is not None:
         id_parts.append(f"id:{metadata_obj_id}")
+    elif item_id is not None:
+        id_parts.append(f"id:{item_id}")
 
     path_part_id = item.get("path_part_id")
     if path_part_id is not None:
