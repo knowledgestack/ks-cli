@@ -1,6 +1,7 @@
 """E2E tests for output format options: --format, --no-header."""
 
 import json
+import re
 
 import pytest
 
@@ -81,3 +82,74 @@ class TestCliOutputFormats:
         assert isinstance(result.json_output, dict)
         assert "name" in result.json_output
         assert "items" not in result.json_output
+
+    def test_tree_output_shows_folder_content_hierarchy(
+        self, cli_authenticated: dict[str, str]
+    ) -> None:
+        """--format tree renders nested items under folder branches."""
+        json_result = run_kscli_ok(
+            [
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--show-content",
+                "--max-depth",
+                "3",
+                "--limit",
+                "100",
+            ],
+            env=cli_authenticated,
+        )
+        items = json_result.json_output["items"]
+
+        folders_by_path_id = {
+            item["path_part_id"]: item for item in items if item.get("part_type") == "FOLDER"
+        }
+        nested_item = next(
+            (
+                item
+                for item in items
+                if item.get("parent_path_part_id") in folders_by_path_id
+                and item.get("part_type") in {"FOLDER", "DOCUMENT"}
+            ),
+            None,
+        )
+        assert nested_item is not None, "Expected at least one nested item in seed data"
+        parent_folder = folders_by_path_id[nested_item["parent_path_part_id"]]
+
+        tree_result = run_kscli_ok(
+            [
+                "--format",
+                "tree",
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--show-content",
+                "--max-depth",
+                "3",
+                "--limit",
+                "100",
+            ],
+            env=cli_authenticated,
+            format_json=False,
+        )
+        lines = tree_result.stdout.splitlines()
+        assert any("├── " in line or "└── " in line for line in lines)
+
+        parent_fragment = f"{parent_folder['name']}/ [folder]"
+        child_name = (
+            f"{nested_item['name']}/"
+            if nested_item.get("part_type") == "FOLDER"
+            else nested_item["name"]
+        )
+        child_fragment = f"{child_name} ["
+        parent_line_index = next(
+            idx for idx, line in enumerate(lines) if parent_fragment in line
+        )
+        child_line_index = next(idx for idx, line in enumerate(lines) if child_fragment in line)
+        assert child_line_index > parent_line_index
+
+        child_line = lines[child_line_index]
+        assert re.match(r"^[│ ]{4}[├└]── ", child_line), child_line

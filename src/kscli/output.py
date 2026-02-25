@@ -110,6 +110,10 @@ def _print_tree(
         _render_depth_tree(typed_items, show_content, sections_only)
         return
 
+    if _is_path_linked_tree(typed_items):
+        _render_path_linked_tree(typed_items)
+        return
+
     if _is_flat_tree(typed_items):
         _render_flat_tree(typed_items)
         return
@@ -123,6 +127,19 @@ def _is_depth_tree(items: list[dict[str, Any]]) -> bool:
 
 def _is_flat_tree(items: list[dict[str, Any]]) -> bool:
     return bool(items) and all("part_type" in item for item in items)
+
+
+def _is_path_linked_tree(items: list[dict[str, Any]]) -> bool:
+    """True when items contain path linkage to reconstruct hierarchy."""
+    if not items:
+        return False
+
+    has_path_linkage = all(
+        item.get("part_type") is not None and item.get("path_part_id") is not None
+        for item in items
+    )
+    has_parent_link = any(item.get("parent_path_part_id") is not None for item in items)
+    return has_path_linkage and has_parent_link
 
 
 def _render_depth_tree(
@@ -164,6 +181,70 @@ def _render_flat_tree(items: list[dict[str, Any]]) -> None:
         is_last = index == len(items) - 1
         connector = "└── " if is_last else "├── "
         click.echo(f"{connector}{_build_node_label(item)}")
+
+
+def _render_path_linked_tree(items: list[dict[str, Any]]) -> None:
+    """Render tree by reconstructing parent/child links from path IDs."""
+    keyed_items = [item for item in items if item.get("path_part_id") is not None]
+    if len(keyed_items) != len(items):
+        _render_flat_tree(items)
+        return
+
+    path_ids = {str(item["path_part_id"]) for item in keyed_items}
+    children_by_parent: dict[str, list[dict[str, Any]]] = {}
+
+    for item in keyed_items:
+        parent_key = str(item.get("parent_path_part_id") or "")
+        children_by_parent.setdefault(parent_key, []).append(item)
+
+    roots = [
+        item
+        for item in keyed_items
+        if str(item.get("parent_path_part_id") or "") not in path_ids
+    ]
+    if not roots:
+        _render_flat_tree(items)
+        return
+
+    branch_continues: list[bool] = []
+    emitted_nodes: set[str] = set()
+
+    def _emit_node(node: dict[str, Any], depth: int, is_last: bool) -> None:
+        node_key = str(node["path_part_id"])
+        if node_key in emitted_nodes:
+            return
+        emitted_nodes.add(node_key)
+
+        if len(branch_continues) > depth:
+            branch_continues[:] = branch_continues[:depth]
+        elif len(branch_continues) < depth:
+            branch_continues.extend([False] * (depth - len(branch_continues)))
+
+        prefix = "".join("│   " if has_more else "    " for has_more in branch_continues)
+        connector = "└── " if is_last else "├── "
+        click.echo(f"{prefix}{connector}{_build_node_label(node)}")
+
+        children = children_by_parent.get(node_key, [])
+        if not children:
+            return
+
+        if len(branch_continues) == depth:
+            branch_continues.append(not is_last)
+        else:
+            branch_continues[depth] = not is_last
+
+        for idx, child in enumerate(children):
+            _emit_node(child, depth + 1, idx == len(children) - 1)
+
+    for idx, root in enumerate(roots):
+        _emit_node(root, depth=0, is_last=idx == len(roots) - 1)
+
+    # If pagination returns disconnected slices, still render unreachable items.
+    unreachable_items = [
+        item for item in keyed_items if str(item["path_part_id"]) not in emitted_nodes
+    ]
+    if unreachable_items:
+        _render_flat_tree(unreachable_items)
 
 
 def _coerce_depth(depth: Any) -> int:
