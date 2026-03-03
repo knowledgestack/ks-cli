@@ -102,8 +102,18 @@ def to_dict(obj: object) -> dict[str, Any] | list[Any]:
     """Convert an SDK response model to a plain dict/list for print_result()."""
     if obj is None:
         return {}
-    if isinstance(obj, _SupportsToDict):
-        return obj.to_dict()
-    if isinstance(obj, (dict, list)):
-        return obj
+    normalized = _normalize_value(obj)
+    if isinstance(normalized, (dict, list)):
+        return normalized
     return {}
+
+
+def _normalize_value(obj: Any) -> Any:
+    """Recursively normalize SDK models nested in dict/list responses."""
+    if isinstance(obj, _SupportsToDict):
+        return _normalize_value(obj.to_dict())
+    if isinstance(obj, dict):
+        return {key: _normalize_value(value) for key, value in obj.items()}
+    if isinstance(obj, list):
+        return [_normalize_value(item) for item in obj]
+    return obj

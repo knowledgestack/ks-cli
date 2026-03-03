@@ -30,10 +30,21 @@ def _load_config_file() -> dict[str, Any]:
     return load_config()
 
 
+def get_current_environment() -> str:
+    """Resolve current environment from config. Defaults to 'local'."""
+    return _load_config_file().get("environment", "local")
+
+
 def get_admin_api_key() -> str:
     key = os.environ.get("ADMIN_API_KEY")
     if not key:
-        key = _load_config_file().get("admin_api_key")
+        config = _load_config_file()
+        env = config.get("environment", "local")
+        # Per-environment key (admin_api_key_local, admin_api_key_prod)
+        key = config.get(f"admin_api_key_{env}")
+        if not key:
+            # Legacy flat key for backward compatibility
+            key = config.get("admin_api_key")
     if not key:
         raise SystemExit(
             f"Error: ADMIN_API_KEY is not set. "

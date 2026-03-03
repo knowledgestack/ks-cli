@@ -132,7 +132,7 @@ wheels = [
 
 [[package]]
 name = "ksapi"
-version = "1.32.0"
+version = "1.39.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
@@ -140,9 +140,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/a1/efcadb5c618c4cd750a84f2da5e63ff80a1d688a465773bc755fa08ad339/ksapi-1.32.0.tar.gz", hash = "sha256:840f248b633bfd9dd5a671eaaee5e9227ef0b84d8dbfc34e87944f2d685b172d", size = 114943, upload-time = "2026-02-23T13:19:34.858Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/e3/2a3bfba0d4421afafae609a5ad9e61c1b85ede8258a9ed9944e03c652577/ksapi-1.39.1.tar.gz", hash = "sha256:a539a3b16b0cae55e60f198a0cc121e536889cfbcbc82432f2cf737b7047ac6e", size = 121072, upload-time = "2026-02-27T09:51:30.788Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/79/249802068d6ba0507bb6102cc2c670d393ef62869e8cd426fde6a6a0c929/ksapi-1.32.0-py3-none-any.whl", hash = "sha256:b1f46f149f4f182d1ddf275a0685748e0b038b72e0b9723f84347103c050e86f", size = 237830, upload-time = "2026-02-23T13:19:33.418Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/31/545fb5b00495ca26fd50ea590ca75f618993b9dfd74c6538a86e9b9763b6/ksapi-1.39.1-py3-none-any.whl", hash = "sha256:e3bded8a4e116716ef42e24a976b835b04fb6fbc7f0e7f17421b5a2f3c8cdfc9", size = 251039, upload-time = "2026-02-27T09:51:29.74Z" },
 ]
 
 [[package]]

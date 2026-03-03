@@ -7,6 +7,7 @@ import click
 from kscli.config import (
     get_base_url,
     get_config_path,
+    get_current_environment,
     get_default_format,
     get_tls_config,
     load_config,
@@ -52,6 +53,21 @@ def environment(env_name: str, base_url: str | None) -> None:
     click.echo(f"  verify_ssl = {preset['verify_ssl']}")
 
 
+@settings.command("admin-api-key")
+@click.argument("key", required=False)
+def admin_api_key(key: str | None) -> None:
+    """Set ADMIN_API_KEY for the current environment (stored in config file).
+
+    The key is stored per-environment (admin_api_key_local, admin_api_key_prod).
+    Run 'settings environment <name>' first to switch environments.
+    """
+    env = get_current_environment()
+    if key is None:
+        key = click.prompt("Admin API key", hide_input=True)
+    write_config({f"admin_api_key_{env}": key})
+    click.echo(f"Admin API key set for environment '{env}'.")
+
+
 @settings.command("show")
 @click.pass_context
 def show(ctx) -> None:
@@ -63,7 +79,12 @@ def show(ctx) -> None:
 
     file_config = load_config()
     environment_label = file_config.get("environment", "(not set)")
-    admin_set = "admin_api_key" in file_config or bool(os.environ.get("ADMIN_API_KEY"))
+    env = file_config.get("environment", "local")
+    admin_set = (
+        bool(os.environ.get("ADMIN_API_KEY"))
+        or f"admin_api_key_{env}" in file_config
+        or "admin_api_key" in file_config
+    )
 
     result = {
         "config_file": str(path),

@@ -54,7 +54,8 @@ def create_message(ctx, thread_id, content, role):
         result = api.create_thread_message(
             thread_id,
             ksapi.CreateThreadMessageRequest(
-                content={"text": content}, role=role
+                content=ksapi.ThreadMessageContent(text=content),
+                role=role,
             ),
         )
         print_result(ctx, to_dict(result))
