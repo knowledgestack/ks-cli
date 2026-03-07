@@ -14,7 +14,7 @@ from kscli.auth import load_credentials
 from kscli.config import get_base_url, get_tls_config
 
 _STATUS_MESSAGES = {
-    401: "Session expired. Run: kscli assume-user --tenant-id <id> --user-id <id>",
+    401: "Session expired. Run: kscli login --api-key <key>",
     403: "Permission denied",
     404: "Not found",
     409: "Conflict",
@@ -47,7 +47,9 @@ def get_api_client(ctx: click.Context) -> ksapi.ApiClient:
     if verify_ssl:
         config.ssl_ca_cert = ca_bundle or certifi.where()
 
-    return ksapi.ApiClient(config, cookie=f"ks_uat={creds['token']}")
+    client = ksapi.ApiClient(config)
+    client.default_headers["authorization"] = f"Bearer {creds['api_key']}"
+    return client
 
 
 def handle_api_error(e: ksapi.ApiException) -> None:

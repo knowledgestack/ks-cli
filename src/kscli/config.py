@@ -35,24 +35,6 @@ def get_current_environment() -> str:
     return _load_config_file().get("environment", "local")
 
 
-def get_admin_api_key() -> str:
-    key = os.environ.get("ADMIN_API_KEY")
-    if not key:
-        config = _load_config_file()
-        env = config.get("environment", "local")
-        # Per-environment key (admin_api_key_local, admin_api_key_prod)
-        key = config.get(f"admin_api_key_{env}")
-        if not key:
-            # Legacy flat key for backward compatibility
-            key = config.get("admin_api_key")
-    if not key:
-        raise SystemExit(
-            f"Error: ADMIN_API_KEY is not set. "
-            f"Set it via environment variable or in {get_config_path()}"
-        )
-    return key
-
-
 def get_base_url(override: str | None = None) -> str:
     if override:
         return override
