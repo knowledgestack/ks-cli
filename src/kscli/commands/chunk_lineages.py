@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 
@@ -21,7 +21,7 @@ def describe_chunk_lineage(ctx, chunk_id):
     with handle_client_errors():
         api = ksapi.ChunkLineagesApi(api_client)
         result = api.get_chunk_lineage(chunk_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump())
 
 
 @chunk_lineages.command("create")
@@ -39,7 +39,7 @@ def create_chunk_lineage(ctx, parent_chunk_id, child_chunk_id):
                 parent_chunk_ids=[parent_chunk_id],
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, [r.model_dump(mode="json") for r in result])
 
 
 @chunk_lineages.command("delete")

@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 
@@ -23,4 +23,4 @@ def update_user(ctx, default_tenant_id):
         result = api.update_me(
             ksapi.UpdateUserRequest(default_tenant_id=default_tenant_id)
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))

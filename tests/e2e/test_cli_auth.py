@@ -1,4 +1,4 @@
-"""E2E tests for authentication commands: assume-user, whoami."""
+"""E2E tests for authentication commands: login, logout, whoami."""
 
 import tempfile
 from pathlib import Path
@@ -7,10 +7,8 @@ import pytest
 
 from tests.e2e.cli_helpers import run_kscli_fail, run_kscli_ok
 from tests.e2e.conftest import (
-    NONEXISTENT_UUID,
+    E2E_USER_API_KEY,
     PWUSER1_ID,
-    PWUSER1_TENANT_ID,
-    SHARED_TENANT_ID,
 )
 
 pytestmark = pytest.mark.e2e
@@ -19,19 +17,14 @@ pytestmark = pytest.mark.e2e
 class TestCliAuth:
     """Authentication command tests."""
 
-    def test_assume_user_success(self, cli_env: dict[str, str]) -> None:
-        """assume-user with valid credentials succeeds."""
+    def test_login_success(self, cli_env: dict[str, str]) -> None:
+        """Login with valid API key succeeds."""
         result = run_kscli_ok(
-            [
-                "assume-user",
-                "--tenant-id", SHARED_TENANT_ID,
-                "--user-id", PWUSER1_ID,
-            ],
+            ["login", "--api-key", E2E_USER_API_KEY],
             env=cli_env,
             format_json=False,
         )
-        assert "Authenticated as user" in result.stdout
-        assert PWUSER1_ID in result.stdout
+        assert "Logged in successfully" in result.stdout
 
     def test_whoami_shows_identity(self, cli_authenticated: dict[str, str]) -> None:
         """Whoami returns the current user info."""
@@ -40,7 +33,6 @@ class TestCliAuth:
         assert isinstance(data, dict)
         assert data["id"] == PWUSER1_ID
         assert data["email"] == "pwuser1@ksdev.mock"
-        assert data["tenant_id"] == PWUSER1_TENANT_ID
 
     def test_unauthenticated_command_fails(self, cli_env: dict[str, str]) -> None:
         """Running a command without auth fails."""
@@ -52,14 +44,22 @@ class TestCliAuth:
             result = run_kscli_fail(["folders", "list"], env=env)
             assert result.exit_code != 0
 
-    def test_assume_user_bad_user_id_fails(self, cli_env: dict[str, str]) -> None:
-        """assume-user with a nonexistent user ID fails."""
-        run_kscli_fail(
-            [
-                "assume-user",
-                "--tenant-id", SHARED_TENANT_ID,
-                "--user-id", NONEXISTENT_UUID,
-            ],
+    def test_logout(self, cli_env: dict[str, str]) -> None:
+        """Logout removes credentials."""
+        # Login first
+        run_kscli_ok(
+            ["login", "--api-key", E2E_USER_API_KEY],
+            env=cli_env,
+            format_json=False,
+        )
+        # Logout
+        result = run_kscli_ok(["logout"], env=cli_env, format_json=False)
+        assert "Logged out" in result.stdout
+        # Verify we're no longer authenticated
+        run_kscli_fail(["folders", "list"], env=cli_env)
+        # Re-login for other tests that depend on cli_env credentials
+        run_kscli_ok(
+            ["login", "--api-key", E2E_USER_API_KEY],
             env=cli_env,
             format_json=False,
         )

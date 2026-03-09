@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["id", "name", "type", "parent_path_part_id", "created_at"]
@@ -33,7 +33,7 @@ def list_path_parts(ctx, parent_path_id, limit, offset):
         result = api.list_path_parts(
             limit=limit, offset=offset, parent_path_id=parent_path_id
         )
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @path_parts.command("describe")
@@ -45,4 +45,4 @@ def describe_path_part(ctx, path_part_id):
     with handle_client_errors():
         api = ksapi.PathPartsApi(api_client)
         result = api.get_path_part(path_part_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))

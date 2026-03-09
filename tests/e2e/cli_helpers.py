@@ -10,7 +10,7 @@ from typing import Any
 # Env vars stripped from the inherited environment before merging test overrides.
 # Prevents the developer's shell config from contaminating e2e subprocess calls.
 _SANITIZED_KEYS = frozenset({
-    "ADMIN_API_KEY",
+    "USER_API_KEY",
     "KSCLI_BASE_URL",
     "KSCLI_VERIFY_SSL",
     "KSCLI_CREDENTIALS_PATH",

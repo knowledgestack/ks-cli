@@ -5,7 +5,12 @@ from typing import Any
 import pytest
 
 from tests.e2e.cli_helpers import run_kscli_fail, run_kscli_ok
-from tests.e2e.conftest import FIRST_CHUNK_ID, NONEXISTENT_UUID
+from tests.e2e.conftest import (
+    FIRST_CHUNK_ID,
+    FIRST_SIMPLE_VERSION_ID,
+    NONEXISTENT_UUID,
+    SECOND_CHUNK_ID,
+)
 
 pytestmark = pytest.mark.e2e
 
@@ -40,6 +45,137 @@ class TestCliChunksRead:
             ],
             env=cli_authenticated,
         )
+
+    def test_search_chunks_json(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks returns JSON-serializable dict rows."""
+        result = run_kscli_ok(
+            ["chunks", "search", "--query", "configuration", "--limit", "5"],
+            env=cli_authenticated,
+        )
+        assert isinstance(result.json_output, list)
+        if result.json_output:
+            assert isinstance(result.json_output[0], dict)
+
+    def test_search_chunks_table(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks renders table output without serialization errors."""
+        result = run_kscli_ok(
+            ["chunks", "search", "--query", "configuration", "--limit", "5"],
+            env=cli_authenticated,
+            format_json=False,
+        )
+        assert "Error:" not in result.stderr
+
+    def test_search_chunks_yaml(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks supports YAML output mode."""
+        result = run_kscli_ok(
+            ["--format", "yaml", "chunks", "search", "--query", "configuration", "--limit", "5"],
+            env=cli_authenticated,
+            format_json=False,
+        )
+        assert "Error:" not in result.stderr
+
+    def test_search_chunks_id_only(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks supports id-only output mode."""
+        result = run_kscli_ok(
+            ["--format", "id-only", "chunks", "search", "--query", "configuration", "--limit", "5"],
+            env=cli_authenticated,
+            format_json=False,
+        )
+        assert "Error:" not in result.stderr
+
+    def test_search_chunks_full_text(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks supports full-text search mode."""
+        result = run_kscli_ok(
+            [
+                "chunks",
+                "search",
+                "--query",
+                "configuration",
+                "--search-type",
+                "full_text",
+                "--limit",
+                "5",
+            ],
+            env=cli_authenticated,
+        )
+        assert isinstance(result.json_output, list)
+
+    def test_search_chunks_dense_only(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks supports dense semantic search mode."""
+        result = run_kscli_ok(
+            [
+                "chunks",
+                "search",
+                "--query",
+                "configuration",
+                "--search-type",
+                "dense_only",
+                "--limit",
+                "5",
+            ],
+            env=cli_authenticated,
+        )
+        assert isinstance(result.json_output, list)
+
+    def test_get_bulk_returns_list(self, cli_authenticated: dict[str, str]) -> None:
+        """get-bulk returns a list with the requested chunks."""
+        result = run_kscli_ok(
+            [
+                "chunks", "get-bulk",
+                "--chunk-ids", FIRST_CHUNK_ID,
+                "--chunk-ids", SECOND_CHUNK_ID,
+            ],
+            env=cli_authenticated,
+        )
+        chunks = result.json_output
+        assert isinstance(chunks, list)
+        ids = {row["id"] for row in chunks}
+        assert FIRST_CHUNK_ID in ids
+        assert SECOND_CHUNK_ID in ids
+
+    def test_get_bulk_nonexistent_silently_skipped(self, cli_authenticated: dict[str, str]) -> None:
+        """get-bulk silently skips non-existent IDs."""
+        result = run_kscli_ok(
+            [
+                "chunks", "get-bulk",
+                "--chunk-ids", NONEXISTENT_UUID,
+            ],
+            env=cli_authenticated,
+        )
+        assert result.json_output == []
+
+    def test_version_chunk_ids_returns_list(self, cli_authenticated: dict[str, str]) -> None:
+        """version-chunk-ids returns a dict with chunk_ids list."""
+        result = run_kscli_ok(
+            ["chunks", "version-chunk-ids", FIRST_SIMPLE_VERSION_ID],
+            env=cli_authenticated,
+        )
+        data = result.json_output
+        assert isinstance(data, dict)
+        assert "chunk_ids" in data
+        assert isinstance(data["chunk_ids"], list)
+        assert FIRST_CHUNK_ID in data["chunk_ids"]
+
+    def test_search_chunks_score_threshold(self, cli_authenticated: dict[str, str]) -> None:
+        """Search chunks supports score threshold filtering."""
+        threshold = 0.5
+        result = run_kscli_ok(
+            [
+                "chunks",
+                "search",
+                "--query",
+                "configuration",
+                "--score-threshold",
+                str(threshold),
+                "--limit",
+                "5",
+            ],
+            env=cli_authenticated,
+        )
+        assert isinstance(result.json_output, list)
+        for row in result.json_output:
+            if "score" in row:
+                assert row["score"] >= threshold
 
 
 class TestCliChunksWrite:
@@ -179,3 +315,107 @@ class TestCliChunksWrite:
             ],
             env=cli_authenticated,
         )
+
+    def test_search_chunks_parent_path_ids_scopes_results(
+        self,
+        cli_authenticated: dict[str, str],
+        isolation_folder: dict[str, Any],
+    ) -> None:
+        """Search chunks supports parent-path scoping."""
+        ids = self._create_doc_version_section(cli_authenticated, isolation_folder)
+        unique_query = "kscli-parent-scope-needle-12345"
+        run_kscli_ok(
+            [
+                "chunks",
+                "create",
+                "--content",
+                unique_query,
+                "--section-id",
+                ids["section_path_part_id"],
+                "--chunk-type",
+                "TEXT",
+            ],
+            env=cli_authenticated,
+        )
+
+        # Full-text indexing is async — we can only verify the call succeeds and
+        # that parent_path_ids scoping doesn't cause an error.
+        scoped = run_kscli_ok(
+            [
+                "chunks",
+                "search",
+                "--query",
+                unique_query,
+                "--search-type",
+                "full_text",
+                "--parent-path-ids",
+                isolation_folder["path_part_id"],
+                "--no-active-version-only",
+                "--limit",
+                "5",
+            ],
+            env=cli_authenticated,
+        )
+        assert isinstance(scoped.json_output, list)
+
+        # The API now validates parent-path-ids and returns 404 for unknown IDs.
+        run_kscli_fail(
+            [
+                "chunks",
+                "search",
+                "--query",
+                unique_query,
+                "--parent-path-ids",
+                NONEXISTENT_UUID,
+                "--limit",
+                "5",
+            ],
+            env=cli_authenticated,
+            expected_code=3,
+        )
+
+    def test_search_chunks_combined_options(
+        self,
+        cli_authenticated: dict[str, str],
+        isolation_folder: dict[str, Any],
+    ) -> None:
+        """Search chunks supports combining new search options."""
+        ids = self._create_doc_version_section(cli_authenticated, isolation_folder)
+        unique_query = "kscli-combined-search-options-needle"
+        run_kscli_ok(
+            [
+                "chunks",
+                "create",
+                "--content",
+                unique_query,
+                "--section-id",
+                ids["section_path_part_id"],
+                "--chunk-type",
+                "TEXT",
+            ],
+            env=cli_authenticated,
+        )
+
+        result = run_kscli_ok(
+            [
+                "chunks",
+                "search",
+                "--query",
+                unique_query,
+                "--search-type",
+                "dense_only",
+                "--parent-path-ids",
+                isolation_folder["path_part_id"],
+                "--chunk-types",
+                "TEXT",
+                "--score-threshold",
+                "0.0",
+                "--active-version-only",
+                "--limit",
+                "5",
+            ],
+            env=cli_authenticated,
+        )
+        assert isinstance(result.json_output, list)
+        if result.json_output:
+            assert isinstance(result.json_output[0], dict)

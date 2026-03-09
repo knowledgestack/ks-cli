@@ -1,9 +1,11 @@
 # Project Overview
 
 ## Purpose
+
 `ks-cli` (kscli) is a CLI tool for the Knowledge Stack platform. It wraps the auto-generated `ksapi` Python SDK with a Click-based command interface using a verb-first routing pattern (e.g. `kscli get folders`, `kscli describe document <id>`).
 
 ## Tech Stack
+
 - **Language**: Python 3.14+
 - **Runtime/Package Manager**: uv
 - **CLI Framework**: Click
@@ -16,6 +18,7 @@
 - **Releases**: semantic-release with conventional commits
 
 ## Codebase Structure
+
 ```
 src/kscli/
 ├── cli.py              # Root CLI group, verb-first routing, command registration
@@ -50,15 +53,19 @@ tests/
 ## Key Architecture Patterns
 
 ### Verb-first CLI routing
+
 Commands are organized as `kscli <verb> <resource>`. Verb groups (get, describe, create, update, delete, search, etc.) are defined in `cli.py`. Each resource module exposes `register_<verb>(group)` functions that add Click commands to those groups.
 
 ### Command implementation pattern
+
 Every command follows this pattern:
+
 1. Get authenticated client: `api_client = get_api_client(ctx)`
 2. Wrap in error handling: `with handle_client_errors():`
 3. Instantiate SDK API: `api = ksapi.<Resource>Api(api_client)`
 4. Call SDK method and format: `print_result(ctx, to_dict(result), columns=COLUMNS)`
 
 ### Config layering
+
 Environment variables → `~/.config/kscli/config.json` → defaults.
 Key env vars: `KSCLI_BASE_URL`, `ADMIN_API_KEY`, `KSCLI_FORMAT`, `KSCLI_VERIFY_SSL`, `KSCLI_CA_BUNDLE`, `KSCLI_CONFIG`, `KSCLI_CREDENTIALS_PATH`.

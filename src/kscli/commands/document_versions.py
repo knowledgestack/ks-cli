@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["id", "document_id", "name", "created_at"]
@@ -27,7 +27,7 @@ def list_versions(ctx, document_id, limit, offset):
         result = api.list_document_versions(
             document_id=document_id, limit=limit, offset=offset
         )
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @document_versions.command("describe")
@@ -39,7 +39,7 @@ def describe_version(ctx, version_id):
     with handle_client_errors():
         api = ksapi.DocumentVersionsApi(api_client)
         result = api.get_document_version(version_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @document_versions.command("contents")
@@ -63,7 +63,12 @@ def version_contents(ctx, version_id, show_content, sections_only):
     with handle_client_errors():
         api = ksapi.DocumentVersionsApi(api_client)
         result = api.get_document_version_contents(version_id)
-        print_result(ctx, to_dict(result), show_content=show_content, sections_only=sections_only)
+        print_result(
+            ctx,
+            result.model_dump(mode="json"),
+            show_content=show_content,
+            sections_only=sections_only,
+        )
 
 
 @document_versions.command("create")
@@ -75,7 +80,7 @@ def create_version(ctx, document_id):
     with handle_client_errors():
         api = ksapi.DocumentVersionsApi(api_client)
         result = api.create_document_version(document_id=document_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @document_versions.command("update")
@@ -91,7 +96,7 @@ def update_version(ctx, version_id, source_s3):
             version_id,
             ksapi.DocumentVersionMetadataUpdate(source_s3=source_s3),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @document_versions.command("delete")

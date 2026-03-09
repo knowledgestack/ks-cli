@@ -117,7 +117,8 @@ def main(ctx, format_, no_header, base_url):  # noqa: ARG001 — params required
 
 # ── Top-level commands ──────────────────────────────────────────────────────
 
-main.add_command(auth.assume_user)
+main.add_command(auth.login)
+main.add_command(auth.logout)
 main.add_command(auth.whoami)
 main.add_command(settings.settings)
 

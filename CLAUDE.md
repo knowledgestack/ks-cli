@@ -38,7 +38,7 @@ make pre-commit
 
 The CLI uses resource groups as top-level subcommands (e.g. `folders`, `documents`, `chunks`, `tags`). Each resource module defines a `@click.group()` with verb subcommands — e.g. `kscli folders list`, `kscli folders describe <id>`, `kscli folders create`. The groups are registered in `cli.py` via `main.add_command(resource_group)`.
 
-Top-level commands outside resource groups: `assume-user`, `whoami`, `settings`.
+Top-level commands outside resource groups: `login`, `logout`, `whoami`, `settings`.
 
 Resource groups: `folders`, `documents`, `document-versions`, `sections`, `chunks`, `tags`, `workflows`, `tenants`, `users`, `permissions`, `invites`, `threads`, `thread-messages`, `chunk-lineages`, `path-parts`.
 
@@ -59,11 +59,11 @@ Each resource (folders, documents, chunks, etc.) follows the same pattern:
 
 ### Auth (`src/kscli/auth.py`)
 
-JWT-based auth via admin impersonation. `assume_user()` calls `/v1/auth/assume_user`, caches the token to a credentials file (default: `/tmp/kscli/.credentials`). `load_credentials()` auto-refreshes expired tokens.
+API key auth via `kscli login --api-key <key>`. `save_api_key()` stores the key to a credentials file (default: `/tmp/kscli/.credentials`). `load_credentials()` reads the stored API key. `kscli logout` removes credentials.
 
 ### Config (`src/kscli/config.py`)
 
-Layered config resolution: environment variables → config file (`~/.config/kscli/config.json`) → defaults. Key env vars: `KSCLI_BASE_URL`, `ADMIN_API_KEY`, `KSCLI_FORMAT`, `KSCLI_VERIFY_SSL`, `KSCLI_CA_BUNDLE`, `KSCLI_CONFIG`, `KSCLI_CREDENTIALS_PATH`.
+Layered config resolution: environment variables → config file (`~/.config/kscli/config.json`) → defaults. Key env vars: `KSCLI_BASE_URL`, `KSCLI_FORMAT`, `KSCLI_VERIFY_SSL`, `KSCLI_CA_BUNDLE`, `KSCLI_CONFIG`, `KSCLI_CREDENTIALS_PATH`.
 
 Environment presets: `local` (localhost:8000), `prod` (api.knowledgestack.ai) — set via `kscli settings environment <name>`.
 

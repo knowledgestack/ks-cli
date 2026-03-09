@@ -1,7 +1,5 @@
 """Settings commands: environment, show."""
 
-import os
-
 import click
 
 from kscli.config import (
@@ -17,8 +15,13 @@ from kscli.output import print_result
 _ENV_PRESETS: dict[str, dict[str, object]] = {
     "local": {
         "environment": "local",
-        "base_url": "http://localhost:8000",
+        "base_url": "http://localhost:18000",
         "verify_ssl": False,
+    },
+    "staging": {
+        "environment": "staging",
+        "base_url": "https://api-staging.knowledgestack.ai",
+        "verify_ssl": True,
     },
     "prod": {
         "environment": "prod",
@@ -34,17 +37,17 @@ def settings():
 
 
 @settings.command("environment")
-@click.argument("env_name", type=click.Choice(["local", "prod"]))
+@click.argument("env_name", type=click.Choice(["local", "staging", "prod"]))
 @click.option(
-    "--base-url",
+    "--url",
     default=None,
     help="Override default API base URL for the selected environment",
 )
-def environment(env_name: str, base_url: str | None) -> None:
+def environment(env_name: str, url: str | None) -> None:
     """Set the environment (local, prod) and associated config."""
     preset = _ENV_PRESETS[env_name].copy()
-    if base_url:
-        preset["base_url"] = base_url
+    if url:
+        preset["base_url"] = url
     write_config(preset)
     click.echo(f"Environment set to '{env_name}'.")
     if "base_url" in preset:
@@ -54,7 +57,7 @@ def environment(env_name: str, base_url: str | None) -> None:
 
 @settings.command("show")
 @click.pass_context
-def show(ctx) -> None:
+def show(ctx: click.Context) -> None:
     """Print current resolved configuration (env + config file + defaults)."""
     base_url = get_base_url(None)
     verify_ssl, ca_bundle = get_tls_config()
@@ -63,7 +66,6 @@ def show(ctx) -> None:
 
     file_config = load_config()
     environment_label = file_config.get("environment", "(not set)")
-    admin_set = "admin_api_key" in file_config or bool(os.environ.get("ADMIN_API_KEY"))
 
     result = {
         "config_file": str(path),
@@ -72,6 +74,5 @@ def show(ctx) -> None:
         "ca_bundle": ca_bundle or "(default)",
         "format": format_,
         "environment": environment_label,
-        "admin_api_key": "(set)" if admin_set else "(not set)",
     }
     print_result(ctx, result)

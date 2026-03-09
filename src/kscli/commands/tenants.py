@@ -5,7 +5,7 @@ import json
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["id", "name", "created_at"]
@@ -27,7 +27,7 @@ def list_tenants(ctx, limit, offset):
     with handle_client_errors():
         api = ksapi.TenantsApi(api_client)
         result = api.list_tenants(limit=limit, offset=offset)
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @tenants.command("describe")
@@ -39,7 +39,7 @@ def describe_tenant(ctx, tenant_id):
     with handle_client_errors():
         api = ksapi.TenantsApi(api_client)
         result = api.get_tenant(tenant_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tenants.command("create")
@@ -52,10 +52,8 @@ def create_tenant(ctx, name, idp_config):
     with handle_client_errors():
         api = ksapi.TenantsApi(api_client)
         idp = json.loads(idp_config) if idp_config else None
-        result = api.create_tenant(
-            ksapi.CreateTenantRequest(name=name, idp_config=idp)
-        )
-        print_result(ctx, to_dict(result))
+        result = api.create_tenant(ksapi.CreateTenantRequest(name=name, idp_config=idp))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tenants.command("update")
@@ -73,7 +71,7 @@ def update_tenant(ctx, tenant_id, name, idp_config):
             tenant_id,
             ksapi.UpdateTenantRequest(name=name, idp_config=idp),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tenants.command("delete")
@@ -99,4 +97,4 @@ def list_tenant_users(ctx, tenant_id, limit, offset):
     with handle_client_errors():
         api = ksapi.TenantsApi(api_client)
         result = api.list_tenant_users(tenant_id, limit=limit, offset=offset)
-        print_result(ctx, to_dict(result), columns=USER_COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=USER_COLUMNS)

@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from tests.e2e.cli_helpers import run_kscli_fail, run_kscli_ok
-from tests.e2e.conftest import NONEXISTENT_UUID, PWUSER1_THREADS_FOLDER_PATH_PART_ID
+from tests.e2e.conftest import NONEXISTENT_UUID
 
 pytestmark = pytest.mark.e2e
 
@@ -37,12 +37,12 @@ class TestCliThreadsWrite:
         cli_authenticated: dict[str, str],
     ) -> None:
         """Full CRUD lifecycle for a conversation thread under /users/{id}/threads."""
-        # Create under pwuser1's threads folder (conversation threads can be deleted)
+        # Omit --parent-path-part-id so the API auto-provisions under
+        # /users/{user_id}/threads/ — only those qualify as conversation threads.
         result = run_kscli_ok(
             [
                 "threads", "create",
                 "--title", "e2e test thread",
-                "--parent-path-part-id", PWUSER1_THREADS_FOLDER_PATH_PART_ID,
             ],
             env=cli_authenticated,
         )

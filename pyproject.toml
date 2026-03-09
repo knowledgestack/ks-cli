@@ -11,9 +11,7 @@ urls = { Repository = "https://github.com/knowledgestack/ks-cli" }
 dependencies = [
     "certifi>=2026.1.4",
     "click>=8.3.1",
-    "httpx>=0.28.1",
     "ksapi>=1.25.0",
-    "pyjwt>=2.11.0",
     "rich>=14.3.3",
 ]
 

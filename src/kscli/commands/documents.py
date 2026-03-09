@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["id", "name", "type", "origin", "parent_path_part_id", "created_at"]
@@ -37,7 +37,7 @@ def list_documents(ctx, parent_path_part_id, limit, offset):
             offset=offset,
             parent_path_part_id=parent_path_part_id,
         )
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @documents.command("describe")
@@ -49,7 +49,7 @@ def describe_document(ctx, document_id):
     with handle_client_errors():
         api = ksapi.DocumentsApi(api_client)
         result = api.get_document(document_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @documents.command("create")
@@ -61,7 +61,9 @@ def describe_document(ctx, document_id):
     required=True,
     help="Parent path part ID (e.g. folder's path_part_id from 'describe folder').",
 )
-@click.option("--type", "doc_type", required=True, type=click.Choice(["PDF", "DOCX", "UNKNOWN"]))
+@click.option(
+    "--type", "doc_type", required=True, type=click.Choice(["PDF", "DOCX", "UNKNOWN"])
+)
 @click.option("--origin", required=True, type=click.Choice(["SOURCE", "GENERATED"]))
 @click.pass_context
 def create_document(ctx, name, parent_path_part_id, doc_type, origin):
@@ -77,7 +79,7 @@ def create_document(ctx, name, parent_path_part_id, doc_type, origin):
                 document_origin=origin,
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @documents.command("update")
@@ -92,9 +94,7 @@ def create_document(ctx, name, parent_path_part_id, doc_type, origin):
 )
 @click.option("--active-version-id", type=click.UUID, default=None)
 @click.pass_context
-def update_document(
-    ctx, document_id, name, parent_path_part_id, active_version_id
-):
+def update_document(ctx, document_id, name, parent_path_part_id, active_version_id):
     """Update a document."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
@@ -107,7 +107,7 @@ def update_document(
                 active_version_id=active_version_id,
             ),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @documents.command("delete")
@@ -146,4 +146,4 @@ def ingest_document(ctx, file_path, path_part_id, name):
                 path_part_id=path_part_id,
                 name=file_name,
             )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))

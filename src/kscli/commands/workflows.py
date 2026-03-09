@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["workflow_id", "status", "document_id", "created_at", "last_run_timestamp"]
@@ -24,7 +24,7 @@ def list_workflows(ctx, limit, offset):
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
         result = api.list_workflows(limit=limit, offset=offset)
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @workflows.command("describe")
@@ -36,7 +36,7 @@ def describe_workflow(ctx, workflow_id):
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
         result = api.get_workflow(str(workflow_id))
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @workflows.command("cancel")
@@ -48,7 +48,7 @@ def cancel_workflow(ctx, workflow_id):
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
         result = api.workflow_action(str(workflow_id), ksapi.WorkflowAction.CANCEL)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @workflows.command("rerun")
@@ -60,4 +60,4 @@ def rerun_workflow(ctx, workflow_id):
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
         result = api.workflow_action(str(workflow_id), ksapi.WorkflowAction.RERUN)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))

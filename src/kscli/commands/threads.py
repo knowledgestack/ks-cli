@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["id", "title", "parent_path_part_id", "created_at"]
@@ -27,7 +27,7 @@ def list_threads(ctx, parent_path_part_id, limit, offset):
         result = api.list_threads(
             limit=limit, offset=offset, parent_path_part_id=parent_path_part_id
         )
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @threads.command("describe")
@@ -39,7 +39,7 @@ def describe_thread(ctx, thread_id):
     with handle_client_errors():
         api = ksapi.ThreadsApi(api_client)
         result = api.get_thread(thread_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @threads.command("create")
@@ -57,7 +57,7 @@ def create_thread(ctx, title, parent_path_part_id):
                 parent_path_part_id=parent_path_part_id,
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @threads.command("update")
@@ -72,11 +72,9 @@ def update_thread(ctx, thread_id, title, parent_thread_id):
         api = ksapi.ThreadsApi(api_client)
         result = api.update_thread(
             thread_id,
-            ksapi.UpdateThreadRequest(
-                title=title, parent_thread_id=parent_thread_id
-            ),
+            ksapi.UpdateThreadRequest(title=title, parent_thread_id=parent_thread_id),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @threads.command("delete")

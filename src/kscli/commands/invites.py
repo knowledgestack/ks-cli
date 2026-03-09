@@ -1,12 +1,13 @@
 """Invite commands."""
 
-from uuid import UUID
-
 import click
 import ksapi
 
-from kscli.auth import load_credentials
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import (
+    get_api_client,
+    get_current_identity,
+    handle_client_errors,
+)
 from kscli.output import print_result
 
 COLUMNS = ["id", "email", "role", "status", "created_at"]
@@ -27,7 +28,7 @@ def list_invites(ctx, limit, offset):
     with handle_client_errors():
         api = ksapi.InvitesApi(api_client)
         result = api.list_invites(limit=limit, offset=offset)
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @invites.command("create")
@@ -39,7 +40,7 @@ def create_invite(ctx, tenant_id, email, role):
     """Create an invite."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
-        tid = tenant_id or UUID(load_credentials()["tenant_id"])
+        tid = tenant_id or get_current_identity(api_client).current_tenant_id
         api = ksapi.InvitesApi(api_client)
         result = api.create_invite(
             ksapi.InviteUserRequest(
@@ -48,7 +49,7 @@ def create_invite(ctx, tenant_id, email, role):
                 role=role,
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @invites.command("delete")
@@ -72,4 +73,4 @@ def accept_invite(ctx, invite_id):
     with handle_client_errors():
         api = ksapi.InvitesApi(api_client)
         result = api.accept_invite(invite_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
