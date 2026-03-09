@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.2.0 (2026-03-09)
+
+### Bug Fixes
+
+- Tenant id ([#2](https://github.com/knowledgestack/ks-cli/pull/2),
+  [`dbb7ecc`](https://github.com/knowledgestack/ks-cli/commit/dbb7eccc2eecf9149f647481bb09d19cc3ea5413))
+
+### Features
+
+- Folder Iterative Bulk Ingestion; Settings & Envs; Chunks Modification; `API_KEY` Integration
+  ([#2](https://github.com/knowledgestack/ks-cli/pull/2),
+  [`dbb7ecc`](https://github.com/knowledgestack/ks-cli/commit/dbb7eccc2eecf9149f647481bb09d19cc3ea5413))
+
+
 ## v1.1.0 (2026-02-22)
 
 ### Features
