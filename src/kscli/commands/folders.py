@@ -7,11 +7,18 @@ from pathlib import Path
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 from kscli.utils.error import format_api_error
 
-COLUMNS = ["id", "path_part_id", "name", "parent_path_part_id", "materialized_path", "created_at"]
+COLUMNS = [
+    "id",
+    "path_part_id",
+    "name",
+    "parent_path_part_id",
+    "materialized_path",
+    "created_at",
+]
 
 
 type IngestFailure = tuple[str, str]
@@ -84,7 +91,9 @@ def _run_ingest_live(
                     )
                 )
                 path_map[rel_subdir] = str(result.path_part_id)
-                click.echo(f"Creating folder: {rel_subdir} ... ok (path_part_id={result.path_part_id})")
+                click.echo(
+                    f"Creating folder: {rel_subdir} ... ok (path_part_id={result.path_part_id})"
+                )
                 folders_created += 1
             except ksapi.ApiException as e:
                 msg = format_api_error(e)
@@ -110,9 +119,9 @@ def _run_ingest_live(
                         path_part_id=uuid.UUID(current_path_part_id),
                         name=file_name,
                     )
-                d = to_dict(result)
-                doc_id = d.get("id", "?") if isinstance(d, dict) else "?"
-                click.echo(f"Ingesting: {rel_file} ... ok (document_id={doc_id})")
+                click.echo(
+                    f"Ingesting: {rel_file} ... ok (document_id={result.document_id})"
+                )
                 files_ingested += 1
             except ksapi.ApiException as e:
                 msg = format_api_error(e)
@@ -149,7 +158,9 @@ def folders():
     default=None,
     help="Folder ID to list contents for. Auto-resolves to path_part_id for listing subfolders. Mutually exclusive with --parent-path-part-id.",
 )
-@click.option("--max-depth", type=int, default=None, help="Max depth (with --show-content).")
+@click.option(
+    "--max-depth", type=int, default=None, help="Max depth (with --show-content)."
+)
 @click.option(
     "--sort-order",
     type=click.Choice(["LOGICAL", "NAME", "UPDATED_AT", "CREATED_AT"]),
@@ -166,11 +177,23 @@ def folders():
 @click.option("--limit", type=int, default=20)
 @click.option("--offset", type=int, default=0)
 @click.pass_context
-def list_folders(ctx, parent_path_part_id, show_content, folder_id, max_depth, sort_order, with_tags, limit, offset):
+def list_folders(
+    ctx,
+    parent_path_part_id,
+    show_content,
+    folder_id,
+    max_depth,
+    sort_order,
+    with_tags,
+    limit,
+    offset,
+):
     """List folders."""
     # Validation: mutual exclusivity
     if parent_path_part_id is not None and folder_id is not None:
-        raise click.UsageError("--folder-id and --parent-path-part-id are mutually exclusive.")
+        raise click.UsageError(
+            "--folder-id and --parent-path-part-id are mutually exclusive."
+        )
 
     # Validation: show_content requires folder_id
     if show_content and folder_id is None:
@@ -203,7 +226,14 @@ def list_folders(ctx, parent_path_part_id, show_content, folder_id, max_depth, s
                 limit=limit,
                 offset=offset,
             )
-            print_result(ctx, to_dict(result))
+            # Items are oneOf union wrappers; resolve actual_instance for serialization.
+            data = result.model_dump(mode="json")
+            data["items"] = [
+                item.actual_instance.model_dump(mode="json")
+                for item in result.items
+                if item.actual_instance is not None
+            ]
+            print_result(ctx, data)
     else:
         # list_folders (folders only)
         with handle_client_errors():
@@ -215,7 +245,7 @@ def list_folders(ctx, parent_path_part_id, show_content, folder_id, max_depth, s
                 limit=limit,
                 offset=offset,
             )
-            print_result(ctx, to_dict(result), columns=COLUMNS)
+            print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @folders.command("describe")
@@ -227,7 +257,7 @@ def describe_folder(ctx, folder_id):
     with handle_client_errors():
         api = ksapi.FoldersApi(api_client)
         result = api.get_folder(folder_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @folders.command("create")
@@ -251,7 +281,7 @@ def create_folder(ctx, name, parent_path_part_id):
                 parent_path_part_id=parent_path_part_id,
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @folders.command("update")
@@ -277,7 +307,7 @@ def update_folder(ctx, folder_id, name, parent_path_part_id):
                 parent_path_part_id=parent_path_part_id,
             ),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @folders.command("delete")
@@ -329,9 +359,13 @@ def ingest_folders(
 ) -> None:
     """Bulk-ingest a local folder tree: mirror directory structure and upload supported files."""
     if (folder_id is None) == (path_part_id is None):
-        raise click.UsageError("Exactly one of --folder-id or --path-part-id is required.")
+        raise click.UsageError(
+            "Exactly one of --folder-id or --path-part-id is required."
+        )
 
-    extensions = {ext.strip().lower() for ext in extensions_str.split(",") if ext.strip()}
+    extensions = {
+        ext.strip().lower() for ext in extensions_str.split(",") if ext.strip()
+    }
     if not extensions:
         raise click.UsageError("--extensions must include at least one extension.")
 
@@ -353,19 +387,19 @@ def ingest_folders(
                 assert path_part_id is not None
                 parent_path_part_id = path_part_id
 
-        folders_created, files_ingested, files_skipped, failures = _run_ingest_live(
-            local_path=local_path,
-            extensions=extensions,
-            parent_path_part_id=parent_path_part_id,
-            folders_api=folders_api,
-            documents_api=documents_api,
-        )
+            folders_created, files_ingested, files_skipped, failures = _run_ingest_live(
+                local_path=local_path,
+                extensions=extensions,
+                parent_path_part_id=parent_path_part_id,
+                folders_api=folders_api,
+                documents_api=documents_api,
+            )
 
     summary_parts = [
         f"{folders_created} folder(s) created",
         f"{files_ingested} file(s) ingested",
         f"{files_skipped} skipped",
-        *(f"{len(failures)} failed" if failures else []),
+        *([f"{len(failures)} failed"] if failures else []),
     ]
     click.echo(f"\nSummary: {'\n * '.join(summary_parts)}")
     if failures:

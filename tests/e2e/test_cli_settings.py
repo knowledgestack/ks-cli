@@ -50,4 +50,4 @@ class TestCliSettings:
             env=cli_authenticated,
             format_json=False,
         )
-        assert "localhost:8000" in result.stdout
+        assert "localhost:18000" in result.stdout

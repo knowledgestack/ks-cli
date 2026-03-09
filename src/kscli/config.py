@@ -26,13 +26,9 @@ def load_config() -> dict[str, Any]:
     return {}
 
 
-def _load_config_file() -> dict[str, Any]:
-    return load_config()
-
-
 def get_current_environment() -> str:
     """Resolve current environment from config. Defaults to 'local'."""
-    return _load_config_file().get("environment", "local")
+    return load_config().get("environment", "local")
 
 
 def get_base_url(override: str | None = None) -> str:
@@ -40,7 +36,7 @@ def get_base_url(override: str | None = None) -> str:
         return override
     return (
         os.environ.get("KSCLI_BASE_URL")
-        or _load_config_file().get("base_url")
+        or load_config().get("base_url")
         or _DEFAULT_BASE_URL
     )
 
@@ -48,7 +44,7 @@ def get_base_url(override: str | None = None) -> str:
 def get_default_format() -> str:
     return (
         os.environ.get("KSCLI_FORMAT")
-        or _load_config_file().get("format")
+        or load_config().get("format")
         or _DEFAULT_FORMAT
     )
 
@@ -59,7 +55,7 @@ def get_tls_config() -> tuple[bool, str | None]:
     Returns:
         (verify_ssl, ca_bundle_path)
     """
-    config = _load_config_file()
+    config = load_config()
 
     # Verify SSL: defaults to True
     verify_env = os.environ.get("KSCLI_VERIFY_SSL")
@@ -90,6 +86,6 @@ def write_config(updates: dict[str, Any]) -> None:
     path = get_config_path()
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    current = _load_config_file()
+    current = load_config()
     merged = {**current, **updates}
     path.write_text(json.dumps(merged, indent=2))

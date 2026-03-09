@@ -19,30 +19,11 @@ E2E_BASE_URL = "http://localhost:28000"
 _KS_BACKEND_ENV_E2E = Path(__file__).resolve().parents[3] / "ks-backend" / ".env.e2e"
 
 
-def _read_user_api_key() -> str:
-    """Parse USER_API_KEY from ks-backend/.env.e2e."""
-    if not _KS_BACKEND_ENV_E2E.is_file():
-        pytest.exit(
-            f"Cannot find {_KS_BACKEND_ENV_E2E}. "
-            "Ensure ks-backend is checked out alongside ks-cli.",
-            returncode=1,
-        )
-    for line in _KS_BACKEND_ENV_E2E.read_text().splitlines():
-        stripped = line.strip()
-        if stripped.startswith("USER_API_KEY=") and not stripped.startswith("#"):
-            return stripped.split("=", 1)[1].strip().strip('"').strip("'")
-    pytest.exit(
-        f"USER_API_KEY not found in {_KS_BACKEND_ENV_E2E}",
-        returncode=1,
-    )
-    return ""  # unreachable, keeps type checker happy
-
-
-E2E_USER_API_KEY = _read_user_api_key()
-
 # ---------------------------------------------------------------------------
 # Well-known seed data UUIDs (from ../ks-backend/seed/seed_data.py)
 # ---------------------------------------------------------------------------
+
+E2E_USER_API_KEY = "sk-user-pwuser1-personal-api-key-secret-pwuser1"
 
 PWUSER1_ID = "00000000-0000-0000-0001-000000000001"
 PWUSER2_ID = "00000000-0000-0000-0001-000000000002"
@@ -133,9 +114,12 @@ def kscli_parent_folder(
     """
     result = run_kscli_ok(
         [
-            "folders", "create",
-            "--name", f"kscli_{secrets.token_hex(4)}",
-            "--parent-path-part-id", AGENTS_FOLDER_PATH_PART_ID,
+            "folders",
+            "create",
+            "--name",
+            f"kscli_{secrets.token_hex(4)}",
+            "--parent-path-part-id",
+            AGENTS_FOLDER_PATH_PART_ID,
         ],
         env=cli_authenticated,
     )
@@ -160,9 +144,12 @@ def isolation_folder(
     """
     result = run_kscli_ok(
         [
-            "folders", "create",
-            "--name", f"iso_{secrets.token_hex(6)}",
-            "--parent-path-part-id", kscli_parent_folder["path_part_id"],
+            "folders",
+            "create",
+            "--name",
+            f"iso_{secrets.token_hex(6)}",
+            "--parent-path-part-id",
+            kscli_parent_folder["path_part_id"],
         ],
         env=cli_authenticated,
     )

@@ -4,7 +4,7 @@ import click
 import ksapi
 
 from kscli.auth import clear_credentials, save_api_key
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.config import get_current_environment
 from kscli.output import print_result
 
@@ -39,4 +39,4 @@ def whoami(ctx: click.Context) -> None:
     with handle_client_errors():
         api = ksapi.UsersApi(api_client)
         data = api.get_me()
-        print_result(ctx, to_dict(data))
+        print_result(ctx, data.model_dump())

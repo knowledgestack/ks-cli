@@ -104,7 +104,8 @@ def _print_tree(
         _print_table(data, columns, no_header)
         return
 
-    typed_items = [item for item in items if isinstance(item, dict)]
+    # All items are guaranteed to be dicts by the guard above.
+    typed_items: list[dict[str, Any]] = items  # type: ignore[assignment]
 
     if _is_depth_tree(typed_items):
         _render_depth_tree(typed_items, show_content, sections_only)

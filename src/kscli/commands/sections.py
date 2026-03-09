@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 
@@ -21,7 +21,7 @@ def describe_section(ctx, section_id):
     with handle_client_errors():
         api = ksapi.SectionsApi(api_client)
         result = api.get_section(section_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @sections.command("create")
@@ -43,7 +43,7 @@ def create_section(ctx, name, parent_path_id, page_number, prev_sibling_path_id)
                 prev_sibling_path_id=prev_sibling_path_id,
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @sections.command("update")
@@ -53,7 +53,9 @@ def create_section(ctx, name, parent_path_id, page_number, prev_sibling_path_id)
 @click.option("--prev-sibling-path-id", type=click.UUID, default=None)
 @click.option("--move-to-head", is_flag=True, default=False)
 @click.pass_context
-def update_section(ctx, section_id, name, page_number, prev_sibling_path_id, move_to_head):
+def update_section(
+    ctx, section_id, name, page_number, prev_sibling_path_id, move_to_head
+):
     """Update a section."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
@@ -67,7 +69,7 @@ def update_section(ctx, section_id, name, page_number, prev_sibling_path_id, mov
                 move_to_head=move_to_head,
             ),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @sections.command("delete")

@@ -5,8 +5,22 @@ import json
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
+
+_SEARCH_FILTER_KEYS = {
+    "model",
+    "parent_path_ids",
+    "chunk_type",
+    "updated_at",
+    "score_threshold",
+    "search_type",
+    "tag_ids",
+    "chunk_types",
+    "ingestion_time_after",
+    "active_version_only",
+    "top_k",
+}
 
 
 @click.group("chunks")
@@ -23,7 +37,7 @@ def describe_chunk(ctx, chunk_id):
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
         result = api.get_chunk(chunk_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @chunks.command("create")
@@ -40,9 +54,7 @@ def describe_chunk(ctx, chunk_id):
 def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
     """Create a chunk."""
     if version_id is not None and section_id is not None:
-        raise click.UsageError(
-            "Provide only one of --version-id or --section-id"
-        )
+        raise click.UsageError("Provide only one of --version-id or --section-id")
     parent_path_id = version_id or section_id
     if parent_path_id is None:
         raise click.UsageError("Provide either --version-id or --section-id")
@@ -50,9 +62,10 @@ def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
         metadata = json.loads(meta) if meta else None
-        chunk_metadata = ksapi.ChunkMetadataInput.from_dict(
-            metadata or {}
-        ) or ksapi.ChunkMetadataInput()
+        chunk_metadata = (
+            ksapi.ChunkMetadataInput.from_dict(metadata or {})
+            or ksapi.ChunkMetadataInput()
+        )
         result = api.create_chunk(
             ksapi.CreateChunkRequest(
                 parent_path_id=parent_path_id,
@@ -61,7 +74,7 @@ def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
                 chunk_metadata=chunk_metadata,
             )
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @chunks.command("update")
@@ -74,14 +87,15 @@ def update_chunk(ctx, chunk_id, meta):
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
         metadata = json.loads(meta) if meta else None
-        chunk_metadata = ksapi.ChunkMetadataInput.from_dict(
-            metadata or {}
-        ) or ksapi.ChunkMetadataInput()
+        chunk_metadata = (
+            ksapi.ChunkMetadataInput.from_dict(metadata or {})
+            or ksapi.ChunkMetadataInput()
+        )
         result = api.update_chunk_metadata(
             chunk_id,
             ksapi.UpdateChunkMetadataRequest(chunk_metadata=chunk_metadata),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @chunks.command("update-content")
@@ -97,7 +111,7 @@ def update_chunk_content(ctx, chunk_id, content):
             chunk_id,
             ksapi.UpdateChunkContentRequest(content=content),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @chunks.command("delete")
@@ -127,7 +141,7 @@ def get_chunks_bulk(ctx, chunk_ids):
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
         result = api.get_chunks_bulk(chunk_ids=list(chunk_ids))
-        print_result(ctx, [to_dict(r) for r in result])
+        print_result(ctx, [r.model_dump(mode="json") for r in result])
 
 
 @chunks.command("version-chunk-ids")
@@ -139,7 +153,7 @@ def get_version_chunk_ids(ctx, version_id):
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
         result = api.get_version_chunk_ids(version_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @chunks.command("search")
@@ -202,19 +216,6 @@ def search_chunks(
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
         filter_dict = json.loads(filters) if filters else {}
-        _SEARCH_FILTER_KEYS = {
-            "model",
-            "parent_path_ids",
-            "chunk_type",
-            "updated_at",
-            "score_threshold",
-            "search_type",
-            "tag_ids",
-            "chunk_types",
-            "ingestion_time_after",
-            "active_version_only",
-            "top_k",
-        }
         request_kwargs = {
             k: v for k, v in filter_dict.items() if k in _SEARCH_FILTER_KEYS
         }
@@ -231,10 +232,5 @@ def search_chunks(
             request_kwargs["score_threshold"] = score_threshold
         if active_version_only is not None:
             request_kwargs["active_version_only"] = active_version_only
-        # Keep compatibility with older API deployments unless explicitly set.
-        if "active_version_only" not in request_kwargs:
-            request_kwargs["active_version_only"] = None
-        result = api.search_chunks(
-            ksapi.ChunkSearchRequest(**request_kwargs)
-        )
-        print_result(ctx, to_dict(result))
+        result = api.search_chunks(ksapi.ChunkSearchRequest(**request_kwargs))
+        print_result(ctx, [r.model_dump(mode="json") for r in result])

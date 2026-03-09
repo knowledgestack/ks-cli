@@ -3,7 +3,7 @@
 import click
 import ksapi
 
-from kscli.client import get_api_client, handle_client_errors, to_dict
+from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
 
 COLUMNS = ["id", "name", "color", "description", "created_at"]
@@ -24,7 +24,7 @@ def list_tags(ctx, limit, offset):
     with handle_client_errors():
         api = ksapi.TagsApi(api_client)
         result = api.list_tags(limit=limit, offset=offset)
-        print_result(ctx, to_dict(result), columns=COLUMNS)
+        print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
 @tags.command("describe")
@@ -36,7 +36,7 @@ def describe_tag(ctx, tag_id):
     with handle_client_errors():
         api = ksapi.TagsApi(api_client)
         result = api.get_tag(tag_id)
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tags.command("create")
@@ -51,11 +51,9 @@ def create_tag(ctx, name, color, description):
         api = ksapi.TagsApi(api_client)
         color_val = color.lstrip("#") if color else color
         result = api.create_tag(
-            ksapi.CreateTagRequest(
-                name=name, color=color_val, description=description
-            )
+            ksapi.CreateTagRequest(name=name, color=color_val, description=description)
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tags.command("update")
@@ -72,11 +70,9 @@ def update_tag(ctx, tag_id, name, color, description):
         color_val = color.lstrip("#") if color else color
         result = api.update_tag(
             tag_id,
-            ksapi.UpdateTagRequest(
-                name=name, color=color_val, description=description
-            ),
+            ksapi.UpdateTagRequest(name=name, color=color_val, description=description),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tags.command("delete")
@@ -104,7 +100,7 @@ def attach_tag(ctx, tag_id, path_part_id):
             path_part_id,
             ksapi.BulkTagRequest(tag_ids=[tag_id]),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))
 
 
 @tags.command("detach")
@@ -120,4 +116,4 @@ def detach_tag(ctx, tag_id, path_part_id):
             path_part_id,
             ksapi.BulkTagRequest(tag_ids=[tag_id]),
         )
-        print_result(ctx, to_dict(result))
+        print_result(ctx, result.model_dump(mode="json"))

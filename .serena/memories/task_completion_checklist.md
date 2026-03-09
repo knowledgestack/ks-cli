@@ -10,6 +10,7 @@ After completing a coding task, run these checks:
 Or run all at once: `make pre-commit`
 
 ## When adding a new resource command
+
 - Create `src/kscli/commands/<resource>.py` with `register_<verb>()` functions
 - Register the commands in `src/kscli/cli.py` on the appropriate verb groups
 - Add tests in `tests/test_cli_<resource>.py` using `cli_helpers.run_kscli_ok`/`run_kscli_fail`
