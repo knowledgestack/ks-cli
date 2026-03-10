@@ -24,9 +24,8 @@ from kscli.output import print_result
 def login(api_key: str, url: str | None) -> None:
     """Authenticate with a user-scoped API key."""
     save_api_key(api_key)
-    if url:
-        write_config({"base_url": url, "verify_ssl": True})
     target = url or _DEFAULT_BASE_URL
+    write_config({"base_url": target, "verify_ssl": target.startswith("https")})
     click.echo(f"Logged in successfully ({target}).")
 
 
