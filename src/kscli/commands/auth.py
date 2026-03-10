@@ -1,5 +1,6 @@
 """Authentication commands: login, logout, whoami."""
 
+import certifi
 import click
 import ksapi
 
@@ -23,9 +24,21 @@ from kscli.output import print_result
 )
 def login(api_key: str, url: str | None) -> None:
     """Authenticate with a user-scoped API key."""
-    save_api_key(api_key)
     target = url or _DEFAULT_BASE_URL
-    write_config({"base_url": target, "verify_ssl": target.startswith("https")})
+    verify_ssl = target.startswith("https")
+
+    config = ksapi.Configuration(host=target)
+    config.verify_ssl = verify_ssl
+    if verify_ssl:
+        config.ssl_ca_cert = certifi.where()
+    client = ksapi.ApiClient(config)
+    client.default_headers["authorization"] = f"Bearer {api_key}"
+
+    with handle_client_errors():
+        ksapi.UsersApi(client).get_me()
+
+    save_api_key(api_key)
+    write_config({"base_url": target, "verify_ssl": verify_ssl})
     click.echo(f"Logged in successfully ({target}).")
 
 
