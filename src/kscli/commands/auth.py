@@ -6,7 +6,7 @@ import ksapi
 
 from kscli.auth import clear_credentials, save_api_key
 from kscli.client import get_api_client, handle_client_errors
-from kscli.config import _DEFAULT_BASE_URL, write_config
+from kscli.config import get_base_url, write_config
 from kscli.output import print_result
 
 
@@ -22,9 +22,10 @@ from kscli.output import print_result
     default=None,
     help="API base URL. Defaults to the staging instance.",
 )
-def login(api_key: str, url: str | None) -> None:
+@click.pass_context
+def login(ctx: click.Context, api_key: str, url: str | None) -> None:
     """Authenticate with a user-scoped API key."""
-    target = url or _DEFAULT_BASE_URL
+    target = get_base_url(url or ctx.obj.get("base_url"))
     verify_ssl = target.startswith("https")
 
     config = ksapi.Configuration(host=target)
