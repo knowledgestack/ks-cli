@@ -25,7 +25,7 @@ def describe_section(ctx, section_id):
 
 
 @sections.command("create")
-@click.option("--name", required=True)
+@click.option("--name", "-n", required=True)
 @click.option("--parent-path-id", type=click.UUID, required=True)
 @click.option("--page-number", type=int, default=None)
 @click.option("--prev-sibling-path-id", type=click.UUID, default=None)
@@ -48,7 +48,7 @@ def create_section(ctx, name, parent_path_id, page_number, prev_sibling_path_id)
 
 @sections.command("update")
 @click.argument("section_id", type=click.UUID)
-@click.option("--name", default=None)
+@click.option("--name", "-n", default=None)
 @click.option("--page-number", type=int, default=None)
 @click.option("--prev-sibling-path-id", type=click.UUID, default=None)
 @click.option("--move-to-head", is_flag=True, default=False)

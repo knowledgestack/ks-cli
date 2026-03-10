@@ -22,8 +22,8 @@ def path_parts():
     default=None,
     help="Parent path ID; omit for root/top-level.",
 )
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_path_parts(ctx, parent_path_id, limit, offset):
     """List path parts."""

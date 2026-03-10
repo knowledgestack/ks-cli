@@ -157,8 +157,8 @@ def get_version_chunk_ids(ctx, version_id):
 
 
 @chunks.command("search")
-@click.option("--query", required=True)
-@click.option("--limit", type=int, default=10)
+@click.option("--query", "-q", required=True)
+@click.option("--limit", "-l", type=int, default=10)
 @click.option(
     "--search-type",
     type=click.Choice(["dense_only", "full_text"], case_sensitive=False),
