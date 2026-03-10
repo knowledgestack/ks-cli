@@ -5,7 +5,7 @@ import ksapi
 
 from kscli.auth import clear_credentials, save_api_key
 from kscli.client import get_api_client, handle_client_errors
-from kscli.config import get_current_environment
+from kscli.config import _DEFAULT_BASE_URL, write_config
 from kscli.output import print_result
 
 
@@ -16,19 +16,25 @@ from kscli.output import print_result
     hide_input=True,
     help="User-scoped API key (sk-user-...).",
 )
-def login(api_key: str) -> None:
+@click.option(
+    "--url",
+    default=None,
+    help="API base URL. Defaults to the staging instance.",
+)
+def login(api_key: str, url: str | None) -> None:
     """Authenticate with a user-scoped API key."""
     save_api_key(api_key)
-    env = get_current_environment()
-    click.echo(f"Logged in successfully ({env}).")
+    if url:
+        write_config({"base_url": url, "verify_ssl": True})
+    target = url or _DEFAULT_BASE_URL
+    click.echo(f"Logged in successfully ({target}).")
 
 
 @click.command("logout")
 def logout() -> None:
-    """Remove stored credentials for the current environment."""
-    env = get_current_environment()
+    """Remove stored credentials."""
     clear_credentials()
-    click.echo(f"Logged out ({env}).")
+    click.echo("Logged out.")
 
 
 @click.command("whoami")

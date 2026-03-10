@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 _DEFAULT_CONFIG_PATH = Path.home() / ".config" / "kscli" / "config.json"
-_DEFAULT_BASE_URL = "http://localhost:8000"
+_DEFAULT_BASE_URL = "https://api-staging.knowledgestack.ai"
 _DEFAULT_FORMAT = "table"
 
 
@@ -24,11 +24,6 @@ def load_config() -> dict[str, Any]:
     if path.exists():
         return json.loads(path.read_text())
     return {}
-
-
-def get_current_environment() -> str:
-    """Resolve current environment from config. Defaults to 'local'."""
-    return load_config().get("environment", "local")
 
 
 def get_base_url(override: str | None = None) -> str:
