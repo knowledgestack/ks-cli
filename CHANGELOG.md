@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.2.1 (2026-03-11)
+
+### Bug Fixes
+
+- Add shorthand command functionality ([#3](https://github.com/knowledgestack/ks-cli/pull/3),
+  [`8591889`](https://github.com/knowledgestack/ks-cli/commit/859188952372443966d3c12ea1f87d9ff806a8ad))
+
+- Login and credentials configuration ([#4](https://github.com/knowledgestack/ks-cli/pull/4),
+  [`0f45d04`](https://github.com/knowledgestack/ks-cli/commit/0f45d04b47ec88c519915c9b792f27606755af0f))
+
+
 ## v1.2.0 (2026-03-09)
 
 ### Bug Fixes
