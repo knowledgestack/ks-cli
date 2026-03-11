@@ -139,6 +139,7 @@ def folders():
 @folders.command("list")
 @click.option(
     "--parent-path-part-id",
+    "-p",
     "parent_path_part_id",
     type=click.UUID,
     default=None,
@@ -174,8 +175,8 @@ def folders():
     default=False,
     help="Include tags in the response.",
 )
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_folders(
     ctx,
@@ -261,9 +262,10 @@ def describe_folder(ctx, folder_id):
 
 
 @folders.command("create")
-@click.option("--name", required=True)
+@click.option("--name", "-n", required=True)
 @click.option(
     "--parent-path-part-id",
+    "-p",
     "parent_path_part_id",
     type=click.UUID,
     required=True,
@@ -286,9 +288,10 @@ def create_folder(ctx, name, parent_path_part_id):
 
 @folders.command("update")
 @click.argument("folder_id", type=click.UUID)
-@click.option("--name", default=None)
+@click.option("--name", "-n", default=None)
 @click.option(
     "--parent-path-part-id",
+    "-p",
     "parent_path_part_id",
     type=click.UUID,
     default=None,
@@ -347,7 +350,7 @@ def delete_folder(ctx, folder_id):
     default=".pdf,.docx",
     help="Comma-separated file extensions to ingest (default: .pdf,.docx).",
 )
-@click.option("--dry-run", is_flag=True, help="Print plan without uploading.")
+@click.option("--dry-run", "-d", is_flag=True, help="Print plan without uploading.")
 @click.pass_context
 def ingest_folders(
     ctx: click.Context,

@@ -15,8 +15,8 @@ def tags():
 
 
 @tags.command("list")
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_tags(ctx, limit, offset):
     """List tags."""
@@ -40,7 +40,7 @@ def describe_tag(ctx, tag_id):
 
 
 @tags.command("create")
-@click.option("--name", required=True)
+@click.option("--name", "-n", required=True)
 @click.option("--color", default=None)
 @click.option("--description", default=None)
 @click.pass_context
@@ -58,7 +58,7 @@ def create_tag(ctx, name, color, description):
 
 @tags.command("update")
 @click.argument("tag_id", type=click.UUID)
-@click.option("--name", default=None)
+@click.option("--name", "-n", default=None)
 @click.option("--color", default=None)
 @click.option("--description", default=None)
 @click.pass_context

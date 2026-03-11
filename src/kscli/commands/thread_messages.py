@@ -16,8 +16,8 @@ def thread_messages():
 
 @thread_messages.command("list")
 @click.option("--thread-id", type=click.UUID, required=True)
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_messages(ctx, thread_id, limit, offset):
     """List messages in a thread."""

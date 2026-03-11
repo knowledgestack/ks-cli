@@ -13,6 +13,7 @@ from kscli.output import print_result
 @click.command("login")
 @click.option(
     "--api-key",
+    "-k",
     prompt="API key",
     hide_input=True,
     help="User-scoped API key (sk-user-...).",
