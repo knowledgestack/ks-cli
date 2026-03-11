@@ -24,7 +24,7 @@ from kscli.commands.workflows import workflows
 from kscli.config import ensure_config, get_default_format
 
 _VALUED_OPTS = {"--format": "format", "-f": "format", "--base-url": "base_url"}
-_FLAG_OPTS = {"--no-header": "no_header"}
+_FLAG_OPTS = {"--no-header": "no_header", "-H": "no_header"}
 _FORMAT_CHOICES_LIST = ["table", "json", "yaml", "id-only", "tree"]
 _FORMAT_CHOICES = frozenset(_FORMAT_CHOICES_LIST)
 
@@ -103,7 +103,7 @@ class GlobalOptionsGroup(click.Group):
     type=click.Choice(_FORMAT_CHOICES_LIST),
     default=None,
 )
-@click.option("--no-header", is_flag=True, default=False)
+@click.option("--no-header", "-H", is_flag=True, default=False)
 @click.option("--base-url", default=None)
 @click.pass_context
 def main(ctx, format_, no_header, base_url):  # noqa: ARG001 — params required by Click for --help

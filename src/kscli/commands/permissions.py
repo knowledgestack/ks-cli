@@ -21,8 +21,8 @@ def permissions():
 @permissions.command("list")
 @click.option("--tenant-id", type=click.UUID, default=None)
 @click.option("--user-id", type=click.UUID, default=None)
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_permissions(ctx, tenant_id, user_id, limit, offset):
     """List permissions for a user in a tenant."""

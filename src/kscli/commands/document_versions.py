@@ -16,8 +16,8 @@ def document_versions():
 
 @document_versions.command("list")
 @click.option("--document-id", type=click.UUID, required=True)
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_versions(ctx, document_id, limit, offset):
     """List versions for a document."""

@@ -18,8 +18,8 @@ def tenants():
 
 
 @tenants.command("list")
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_tenants(ctx, limit, offset):
     """List tenants."""
@@ -43,7 +43,7 @@ def describe_tenant(ctx, tenant_id):
 
 
 @tenants.command("create")
-@click.option("--name", required=True)
+@click.option("--name", "-n", required=True)
 @click.option("--idp-config", default=None, help="JSON string of IDP config")
 @click.pass_context
 def create_tenant(ctx, name, idp_config):
@@ -58,7 +58,7 @@ def create_tenant(ctx, name, idp_config):
 
 @tenants.command("update")
 @click.argument("tenant_id", type=click.UUID)
-@click.option("--name", default=None)
+@click.option("--name", "-n", default=None)
 @click.option("--idp-config", default=None, help="JSON string of IDP config")
 @click.pass_context
 def update_tenant(ctx, tenant_id, name, idp_config):
@@ -88,8 +88,8 @@ def delete_tenant(ctx, tenant_id):
 
 @tenants.command("list-users")
 @click.argument("tenant_id", type=click.UUID)
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_tenant_users(ctx, tenant_id, limit, offset):
     """List users in a tenant."""

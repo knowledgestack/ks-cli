@@ -15,9 +15,9 @@ def threads():
 
 
 @threads.command("list")
-@click.option("--parent-path-part-id", type=click.UUID, default=None)
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--parent-path-part-id", "-p", type=click.UUID, default=None)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_threads(ctx, parent_path_part_id, limit, offset):
     """List threads."""
@@ -44,7 +44,7 @@ def describe_thread(ctx, thread_id):
 
 @threads.command("create")
 @click.option("--title", required=True)
-@click.option("--parent-path-part-id", type=click.UUID, default=None)
+@click.option("--parent-path-part-id", "-p", type=click.UUID, default=None)
 @click.pass_context
 def create_thread(ctx, title, parent_path_part_id):
     """Create a thread."""

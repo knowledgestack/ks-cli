@@ -19,13 +19,14 @@ def documents():
 @documents.command("list")
 @click.option(
     "--parent-path-part-id",
+    "-p",
     "parent_path_part_id",
     type=click.UUID,
     default=None,
     help="Parent path part ID; omit for root/top-level.",
 )
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_documents(ctx, parent_path_part_id, limit, offset):
     """List documents."""
@@ -53,9 +54,10 @@ def describe_document(ctx, document_id):
 
 
 @documents.command("create")
-@click.option("--name", required=True)
+@click.option("--name", "-n", required=True)
 @click.option(
     "--parent-path-part-id",
+    "-p",
     "parent_path_part_id",
     type=click.UUID,
     required=True,
@@ -84,9 +86,10 @@ def create_document(ctx, name, parent_path_part_id, doc_type, origin):
 
 @documents.command("update")
 @click.argument("document_id", type=click.UUID)
-@click.option("--name", default=None)
+@click.option("--name", "-n", default=None)
 @click.option(
     "--parent-path-part-id",
+    "-p",
     "parent_path_part_id",
     type=click.UUID,
     default=None,
@@ -131,7 +134,7 @@ def delete_document(ctx, document_id):
     required=True,
     help="Parent path part ID (e.g. folder's path_part_id from 'describe folder').",
 )
-@click.option("--name", default=None)
+@click.option("--name", "-n", default=None)
 @click.pass_context
 def ingest_document(ctx, file_path, path_part_id, name):
     """Ingest a document (upload file + start processing). Parent is the folder's path_part_id."""

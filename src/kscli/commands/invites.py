@@ -19,8 +19,8 @@ def invites():
 
 
 @invites.command("list")
-@click.option("--limit", type=int, default=20)
-@click.option("--offset", type=int, default=0)
+@click.option("--limit", "-l", type=int, default=20)
+@click.option("--offset", "-o", type=int, default=0)
 @click.pass_context
 def list_invites(ctx, limit, offset):
     """List invites."""
