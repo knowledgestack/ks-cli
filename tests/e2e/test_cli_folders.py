@@ -1,7 +1,5 @@
 """E2E tests for folder commands."""
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -39,8 +37,10 @@ class TestCliFoldersRead:
         """List folders under /shared returns known children."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", SHARED_FOLDER_PATH_PART_ID,
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                SHARED_FOLDER_PATH_PART_ID,
             ],
             env=cli_authenticated,
         )
@@ -73,9 +73,11 @@ class TestCliFoldersRead:
         """List folder contents with --show-content returns nested items."""
         result = run_kscli_ok(
             [
-                "folders", "list",
+                "folders",
+                "list",
                 "--show-content",
-                "--folder-id", SHARED_FOLDER_ID,
+                "--folder-id",
+                SHARED_FOLDER_ID,
             ],
             env=cli_authenticated,
         )
@@ -88,10 +90,13 @@ class TestCliFoldersRead:
         """List folder contents with --max-depth limits nesting."""
         result = run_kscli_ok(
             [
-                "folders", "list",
+                "folders",
+                "list",
                 "--show-content",
-                "--folder-id", SHARED_FOLDER_ID,
-                "--max-depth", "1",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--max-depth",
+                "1",
             ],
             env=cli_authenticated,
         )
@@ -104,10 +109,14 @@ class TestCliFoldersRead:
         """First page of /shared/many subfolders returns exactly 10 items."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", MANY_FOLDER_PATH_PART_ID,
-                "--limit", "10",
-                "--offset", "0",
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                MANY_FOLDER_PATH_PART_ID,
+                "--limit",
+                "10",
+                "--offset",
+                "0",
             ],
             env=cli_authenticated,
         )
@@ -122,19 +131,27 @@ class TestCliFoldersRead:
         """Second page has no overlap with first page."""
         page1 = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", MANY_FOLDER_PATH_PART_ID,
-                "--limit", "10",
-                "--offset", "0",
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                MANY_FOLDER_PATH_PART_ID,
+                "--limit",
+                "10",
+                "--offset",
+                "0",
             ],
             env=cli_authenticated,
         )
         page2 = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", MANY_FOLDER_PATH_PART_ID,
-                "--limit", "10",
-                "--offset", "10",
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                MANY_FOLDER_PATH_PART_ID,
+                "--limit",
+                "10",
+                "--offset",
+                "10",
             ],
             env=cli_authenticated,
         )
@@ -148,9 +165,12 @@ class TestCliFoldersRead:
         """Paginating through all items collects >= 100 unique folders."""
         all_items = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", MANY_FOLDER_PATH_PART_ID,
-                "--limit", "100",
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                MANY_FOLDER_PATH_PART_ID,
+                "--limit",
+                "100",
             ],
             env=cli_authenticated,
         )
@@ -167,8 +187,10 @@ class TestCliFoldersRead:
         """Using --folder-id lists subfolders of that folder."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
             ],
             env=cli_authenticated,
         )
@@ -185,8 +207,10 @@ class TestCliFoldersRead:
         """Using --folder-id with --show-content shows mixed content."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
                 "--show-content",
             ],
             env=cli_authenticated,
@@ -201,9 +225,12 @@ class TestCliFoldersRead:
         """Providing both --folder-id and --parent-path-part-id should error."""
         run_kscli_fail(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
-                "--parent-path-part-id", SHARED_FOLDER_PATH_PART_ID,
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--parent-path-part-id",
+                SHARED_FOLDER_PATH_PART_ID,
             ],
             env=cli_authenticated,
             expected_code=2,
@@ -215,7 +242,8 @@ class TestCliFoldersRead:
         """Using --show-content without --folder-id should error."""
         run_kscli_fail(
             [
-                "folders", "list",
+                "folders",
+                "list",
                 "--show-content",
             ],
             env=cli_authenticated,
@@ -228,9 +256,12 @@ class TestCliFoldersRead:
         """Using --max-depth without --show-content should error."""
         run_kscli_fail(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
-                "--max-depth", "2",
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--max-depth",
+                "2",
             ],
             env=cli_authenticated,
             expected_code=2,
@@ -242,9 +273,12 @@ class TestCliFoldersRead:
         """Test LOGICAL sort order."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
-                "--sort-order", "LOGICAL",
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--sort-order",
+                "LOGICAL",
             ],
             env=cli_authenticated,
         )
@@ -258,9 +292,12 @@ class TestCliFoldersRead:
         """Test NAME sort order."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
-                "--sort-order", "NAME",
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
+                "--sort-order",
+                "NAME",
             ],
             env=cli_authenticated,
         )
@@ -274,8 +311,10 @@ class TestCliFoldersRead:
         """Test --with-tags flag."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--folder-id", SHARED_FOLDER_ID,
+                "folders",
+                "list",
+                "--folder-id",
+                SHARED_FOLDER_ID,
                 "--with-tags",
             ],
             env=cli_authenticated,
@@ -290,8 +329,10 @@ class TestCliFoldersRead:
         """Using an invalid folder ID should return exit code 3 (404)."""
         run_kscli_fail(
             [
-                "folders", "list",
-                "--folder-id", NONEXISTENT_UUID,
+                "folders",
+                "list",
+                "--folder-id",
+                NONEXISTENT_UUID,
             ],
             env=cli_authenticated,
             expected_code=3,
@@ -303,8 +344,10 @@ class TestCliFoldersRead:
         """Existing --parent-path-part-id usage still works."""
         result = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", SHARED_FOLDER_PATH_PART_ID,
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                SHARED_FOLDER_PATH_PART_ID,
             ],
             env=cli_authenticated,
         )
@@ -329,9 +372,12 @@ class TestCliFoldersWrite:
         # Create
         result = run_kscli_ok(
             [
-                "folders", "create",
-                "--name", "test-folder",
-                "--parent-path-part-id", parent_id,
+                "folders",
+                "create",
+                "--name",
+                "test-folder",
+                "--parent-path-part-id",
+                parent_id,
             ],
             env=cli_authenticated,
         )
@@ -388,10 +434,13 @@ class TestCliFoldersWrite:
 
         ingest_result = run_kscli_ok(
             [
-                "folders", "bulk-ingest",
+                "folders",
+                "bulk-ingest",
                 str(local_root),
-                "--path-part-id", parent_path_part_id,
-                "--extensions", ".docx",
+                "--path-part-id",
+                parent_path_part_id,
+                "--extensions",
+                ".docx",
             ],
             env=cli_authenticated,
             format_json=False,
@@ -403,9 +452,12 @@ class TestCliFoldersWrite:
 
         top_folders = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", parent_path_part_id,
-                "--limit", "100",
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                parent_path_part_id,
+                "--limit",
+                "100",
             ],
             env=cli_authenticated,
         ).json_output["items"]
@@ -414,9 +466,12 @@ class TestCliFoldersWrite:
 
         alpha_children = run_kscli_ok(
             [
-                "folders", "list",
-                "--parent-path-part-id", alpha["path_part_id"],
-                "--limit", "100",
+                "folders",
+                "list",
+                "--parent-path-part-id",
+                alpha["path_part_id"],
+                "--limit",
+                "100",
             ],
             env=cli_authenticated,
         ).json_output["items"]
@@ -425,9 +480,12 @@ class TestCliFoldersWrite:
 
         root_docs = run_kscli_ok(
             [
-                "documents", "list",
-                "--parent-path-part-id", parent_path_part_id,
-                "--limit", "100",
+                "documents",
+                "list",
+                "--parent-path-part-id",
+                parent_path_part_id,
+                "--limit",
+                "100",
             ],
             env=cli_authenticated,
         ).json_output["items"]
@@ -435,9 +493,12 @@ class TestCliFoldersWrite:
 
         nested_docs = run_kscli_ok(
             [
-                "documents", "list",
-                "--parent-path-part-id", nested["path_part_id"],
-                "--limit", "100",
+                "documents",
+                "list",
+                "--parent-path-part-id",
+                nested["path_part_id"],
+                "--limit",
+                "100",
             ],
             env=cli_authenticated,
         ).json_output["items"]
