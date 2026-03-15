@@ -6,6 +6,7 @@ from kscli.commands import (
     auth,
     settings,
 )
+from kscli.commands.agent_help import agent_help
 from kscli.commands.chunk_lineages import chunk_lineages
 from kscli.commands.chunks import chunks
 from kscli.commands.document_versions import document_versions
@@ -121,6 +122,7 @@ main.add_command(auth.login)
 main.add_command(auth.logout)
 main.add_command(auth.whoami)
 main.add_command(settings.settings)
+main.add_command(agent_help)
 
 # ── Resource groups ─────────────────────────────────────────────────────────
 
