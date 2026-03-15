@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.0 (2026-03-15)
+
+### Features
+
+- Agent help command ([#5](https://github.com/knowledgestack/ks-cli/pull/5),
+  [`bc9e4c3`](https://github.com/knowledgestack/ks-cli/commit/bc9e4c3e80158653f27abda4d03d800bbecb4dca))
+
+
 ## v1.2.1 (2026-03-11)
 
 ### Bug Fixes
