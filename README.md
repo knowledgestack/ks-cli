@@ -11,7 +11,7 @@ kscli chunks search --query "semantic search" --folder-id <id>
 
 ## Installation
 
-Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.14+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 # From PyPI
@@ -25,30 +25,21 @@ uv sync --all-extras --group dev
 
 ## Quick Start
 
-### 1. Configure the environment
+### 1. Authenticate
+
+Create an API key under **My Account / API Keys** after signing up on [app.knowledgestack.ai](https://app.knowledgestack.ai).
 
 ```bash
-# Point at a running Knowledge Stack instance
-kscli settings environment local    # http://localhost:8000
-kscli settings environment prod     # https://api.knowledgestack.ai
+kscli login --api-key <your-api-key>
 ```
 
-Or set environment variables directly:
+You can also point at a different environment:
 
 ```bash
-export KSCLI_BASE_URL=http://localhost:8000
-export ADMIN_API_KEY=your-admin-key
+kscli login --api-key <your-api-key> --url https://api.knowledgestack.ai
 ```
 
-### 2. Authenticate
-
-```bash
-kscli assume-user --tenant-id <tenant-uuid> --user-id <user-uuid>
-```
-
-This obtains a JWT via the `/v1/auth/assume_user` admin endpoint and caches it locally. The token auto-refreshes on expiry. See [docs/authentication.md](docs/authentication.md) for details.
-
-### 3. Use the CLI
+### 2. Use the CLI
 
 ```bash
 # Verify identity
@@ -73,7 +64,8 @@ kscli chunks search --query "quarterly revenue" --folder-id <id>
 
 | Command | Description |
 |---------|-------------|
-| `assume-user` | Authenticate as a specific user via admin impersonation |
+| `login` | Authenticate with a user-scoped API key |
+| `logout` | Remove stored credentials |
 | `whoami` | Show current authenticated identity |
 | `settings environment <name>` | Set environment preset (local/prod) |
 | `settings show` | Print resolved configuration |
@@ -91,7 +83,7 @@ Each resource group supports a subset of verbs (`list`, `describe`, `create`, `u
 | `chunks` | describe, create, update, update-content, delete, search |
 | `tags` | list, describe, create, update, delete, attach, detach |
 | `workflows` | list, describe, cancel, rerun |
-| `tenants` | list, describe, create, update, delete, list-users |
+| `tenants` | list, describe, update, delete, list-users |
 | `users` | update |
 | `permissions` | list, create, update, delete |
 | `invites` | list, create, delete, accept |
@@ -122,7 +114,6 @@ Configuration resolves in order: **CLI flags > environment variables > config fi
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `KSCLI_BASE_URL` | API base URL | `http://localhost:8000` |
-| `ADMIN_API_KEY` | Admin API key for authentication | _(required)_ |
 | `KSCLI_FORMAT` | Default output format | `table` |
 | `KSCLI_VERIFY_SSL` | Enable SSL verification | `true` |
 | `KSCLI_CA_BUNDLE` | Path to custom CA certificate bundle | _(system default)_ |
