@@ -23,7 +23,7 @@ def list_workflows(ctx, limit, offset):
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
-        result = api.list_workflows(limit=limit, offset=offset)
+        result = api.list_dv_workflows(limit=limit, offset=offset)
         print_result(ctx, result.model_dump(mode="json"), columns=COLUMNS)
 
 
@@ -35,7 +35,7 @@ def describe_workflow(ctx, workflow_id):
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
-        result = api.get_workflow(str(workflow_id))
+        result = api.get_dv_workflow(str(workflow_id))
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -47,7 +47,7 @@ def cancel_workflow(ctx, workflow_id):
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
-        result = api.workflow_action(str(workflow_id), ksapi.WorkflowAction.CANCEL)
+        result = api.cancel_temporal_workflow(str(workflow_id))
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -59,5 +59,5 @@ def rerun_workflow(ctx, workflow_id):
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.WorkflowsApi(api_client)
-        result = api.workflow_action(str(workflow_id), ksapi.WorkflowAction.RERUN)
+        result = api.dv_workflow_rerun(str(workflow_id))
         print_result(ctx, result.model_dump(mode="json"))

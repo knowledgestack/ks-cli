@@ -28,6 +28,7 @@ packages = ["src/kscli"]
 [dependency-groups]
 dev = [
     "basedpyright>=1.38.1",
+    "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-xdist>=3.8.0",
     "ruff>=0.15.2",

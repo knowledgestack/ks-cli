@@ -42,20 +42,6 @@ def describe_tenant(ctx, tenant_id):
         print_result(ctx, result.model_dump(mode="json"))
 
 
-@tenants.command("create")
-@click.option("--name", "-n", required=True)
-@click.option("--idp-config", default=None, help="JSON string of IDP config")
-@click.pass_context
-def create_tenant(ctx, name, idp_config):
-    """Create a tenant."""
-    api_client = get_api_client(ctx)
-    with handle_client_errors():
-        api = ksapi.TenantsApi(api_client)
-        idp = json.loads(idp_config) if idp_config else None
-        result = api.create_tenant(ksapi.CreateTenantRequest(name=name, idp_config=idp))
-        print_result(ctx, result.model_dump(mode="json"))
-
-
 @tenants.command("update")
 @click.argument("tenant_id", type=click.UUID)
 @click.option("--name", "-n", default=None)
