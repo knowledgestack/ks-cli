@@ -11,7 +11,7 @@ kscli chunks search --query "semantic search" --folder-id <id>
 
 ## Installation
 
-Requires Python 3.14+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 # From PyPI
