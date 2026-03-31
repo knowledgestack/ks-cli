@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.3.1 (2026-03-31)
+
+### Bug Fixes
+
+- Bump API package ([#6](https://github.com/knowledgestack/ks-cli/pull/6),
+  [`d9f360f`](https://github.com/knowledgestack/ks-cli/commit/d9f360fa0f652be0a77a9357bcf094c87b65c7a5))
+
+- Bump kscli version
+  ([`6d2a5a7`](https://github.com/knowledgestack/ks-cli/commit/6d2a5a7c47e07c0c3a5dcde55343b9cad0c9d96f))
+
+
 ## v1.3.0 (2026-03-15)
 
 ### Features
