@@ -1,5 +1,7 @@
 """Compact CLI reference for AI agents — auto-generated from the Click command tree."""
 
+from __future__ import annotations
+
 import importlib.metadata
 from typing import TYPE_CHECKING
 
