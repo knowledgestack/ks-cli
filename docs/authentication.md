@@ -1,141 +1,146 @@
 # Authentication
 
-kscli uses JWT-based authentication via admin impersonation. An admin API key is used to obtain a short-lived JWT token for a specific user/tenant pair, and the token is cached locally for reuse.
+> 📚 **Hosted version:** [docs.knowledgestack.ai/kscli/authentication](https://docs.knowledgestack.ai/kscli/authentication) — same page with inline video of the dashboard flow.
 
-## Auth Flow
+<p align="center">
+  <img src="https://docs.knowledgestack.ai/assets/kscli/api-key-walkthrough.gif"
+       alt="Create API key → kscli login → whoami"
+       width="720" />
+</p>
 
-```
-                                 ┌──────────────┐
-  kscli assume-user              │  ks-backend  │
-  --tenant-id T                  │              │
-  --user-id U       ──────────>  │ POST         │
-                    X-Admin-     │ /v1/auth/    │
-                    Api-Key      │ assume_user  │
-                                 └──────┬───────┘
-                                        │ { "token": "<jwt>" }
-                                        v
-                              ┌─────────────────────┐
-                              │ ~/.credentials file │
-                              │ (0600 permissions)  │
-                              │                     │
-                              │ token, user_id,     │
-                              │ tenant_id,          │
-                              │ expires_at,         │
-                              │ admin_api_key       │
-                              └─────────┬───────────┘
-                                        │
-                    subsequent commands  │  auto-loaded
-                                        v
-                              ┌─────────────────────┐
-                              │  ksapi.ApiClient    │
-                              │  cookie: ks_uat=JWT │
-                              └─────────────────────┘
-```
+`kscli` authenticates with a **user-scoped API key**. No admin impersonation, no JWT dance — the key is presented as a bearer token on every request and carries the permissions of the user that created it.
 
-## Commands
-
-### `assume-user`
-
-Authenticates as a specific user in a specific tenant.
+## TL;DR
 
 ```bash
-kscli assume-user --tenant-id <tenant-uuid> --user-id <user-uuid>
-```
+# 1. Create a key in the dashboard → copy it once
+# 2. Log in
+kscli login --api-key sk-user-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-**What it does** (`src/kscli/commands/auth.py:19-25`):
-
-1. Reads `ADMIN_API_KEY` from env or config (`src/kscli/config.py:33-42`)
-2. Sends `POST /v1/auth/assume_user` with `X-Admin-Api-Key` header (`src/kscli/auth.py:26-34`)
-3. Decodes the JWT (without verification) to extract the expiration claim (`src/kscli/auth.py:43`)
-4. Writes the credentials file with `0600` permissions (`src/kscli/auth.py:46-57`)
-
-**Output:**
-
-```
-Authenticated as user 00000000-... in tenant 00000000-...
-Token expires: 2026-02-23T12:00:00+00:00
-```
-
-### `whoami`
-
-Shows the currently authenticated identity by calling the `/users/me` API endpoint.
-
-```bash
+# 3. Confirm
 kscli whoami
 ```
 
-**Output** (table format):
+## How to create an API key
+
+API keys are created from the Knowledge Stack dashboard.
+
+1. Sign in to **[app.knowledgestack.ai](https://app.knowledgestack.ai)**. New users can sign up with email/password or Google SSO.
+2. Open the avatar menu (top-right) → **My Account**.
+3. Click the **API Keys** tab.
+4. Click **Create API key**.
+5. Give the key a descriptive label (e.g. `kscli on my laptop`, `CI pipeline`, `ingest cron`) so you can audit and revoke it later.
+6. **Copy the key immediately.** Keys are shown exactly once, and `kscli` needs the full `sk-user-...` string.
+7. (Optional) Set an expiry if the dashboard offers one.
+
+Revoke a key from the same page when you rotate credentials or when a laptop is lost. Revocation is immediate — the next `kscli` command from that machine will exit with code `2` and prompt you to log in again.
+
+## Auth flow
 
 ```
-┌─────────────┬──────────────────────────────────────┐
-│ Key         │ Value                                │
-├─────────────┼──────────────────────────────────────┤
-│ id          │ 00000000-0000-0000-0001-000000000001 │
-│ email       │ user@example.com                     │
-│ tenant_id   │ 00000000-0000-0000-0002-000000000001 │
-│ expires_at  │ 2026-02-23T12:00:00+00:00            │
-└─────────────┴──────────────────────────────────────┘
+  ┌──────────┐    kscli login            ┌──────────────┐
+  │  user    │  --api-key sk-user-...    │  ks-backend  │
+  │          │  ──────────────────────>  │              │
+  │          │    GET /users/me          │  validates   │
+  │          │    Authorization: Bearer  │  and returns │
+  │          │  <──────────────────────  │  200 + user  │
+  └──────────┘                           └──────────────┘
+       │
+       │  on success
+       v
+  ┌──────────────────────────────┐
+  │ /tmp/kscli/.credentials      │  mode 0600
+  │ {"api_key": "sk-user-..."}   │
+  └──────────────────────────────┘
+  ┌──────────────────────────────┐
+  │ ~/.config/kscli/config.json  │
+  │ {"base_url": "...",          │
+  │  "verify_ssl": true}         │
+  └──────────────────────────────┘
 ```
 
-## Credential Caching
+Implementation: [`src/kscli/commands/auth.py`](../src/kscli/commands/auth.py), [`src/kscli/auth.py`](../src/kscli/auth.py), [`src/kscli/client.py`](../src/kscli/client.py).
 
-Credentials are stored at `/tmp/kscli/.credentials` by default (override with `KSCLI_CREDENTIALS_PATH`).
+## Commands
 
-**File format** (JSON):
-
-```json
-{
-  "token": "<jwt>",
-  "user_id": "00000000-...",
-  "tenant_id": "00000000-...",
-  "expires_at": "2026-02-23T12:00:00+00:00",
-  "admin_api_key": "your-admin-key"
-}
-```
-
-The `admin_api_key` is persisted alongside the token so that automatic token refresh works without requiring the env var to be set on every invocation.
-
-## Auto-Refresh
-
-When any command calls `get_api_client()` (`src/kscli/client.py:38-50`), it triggers `load_credentials()` (`src/kscli/auth.py:60-80`) which:
-
-1. Loads the credentials file
-2. Compares `expires_at` against the current UTC time
-3. If expired, calls `assume_user()` again using the cached `admin_api_key`, `tenant_id`, and `user_id`
-4. Returns the refreshed credentials transparently
-
-This means long-running scripts or interactive sessions never break due to token expiry.
-
-## Error Handling
-
-Authentication-related errors produce specific exit codes (`src/kscli/client.py:24-30`):
-
-| HTTP Status | Message | Exit Code |
-|-------------|---------|-----------|
-| 401 | `Session expired. Run: kscli assume-user ...` | 2 |
-| 403 | `Permission denied` | 1 |
-
-If you see exit code 2, re-run `assume-user` to re-authenticate:
+### `login`
 
 ```bash
-kscli assume-user --tenant-id <id> --user-id <id>
+kscli login --api-key <key>                          # prompts if --api-key omitted
+kscli login --api-key <key> --url http://localhost:8000
+```
+
+Validates the key with `GET /users/me` before writing it to disk. If validation fails, nothing is persisted.
+
+### `logout`
+
+```bash
+kscli logout
+```
+
+Removes the credentials file. The config file (base URL, format preference) is left alone.
+
+### `whoami`
+
+```bash
+kscli whoami
+kscli whoami --format yaml
+```
+
+Shows the identity the stored key resolves to — useful for confirming which user and tenant a machine is pointed at.
+
+## Credential storage
+
+| Path | Purpose | Permissions |
+|---|---|---|
+| `/tmp/kscli/.credentials` | API key, JSON `{"api_key": "..."}` | `0600` |
+| `~/.config/kscli/config.json` | Base URL, TLS, default format | user default |
+
+Override either location via environment variable:
+
+- `KSCLI_CREDENTIALS_PATH` — directory that holds `.credentials` (default `/tmp/kscli`). Point this at a persistent location (e.g. `~/.config/kscli`) if you don't want the key wiped on reboot.
+- `KSCLI_CONFIG` — full path to the config file.
+
+Example — persist the credentials file across reboots:
+
+```bash
+export KSCLI_CREDENTIALS_PATH=~/.config/kscli
+kscli login --api-key sk-user-...
+```
+
+## Pointing at a different environment
+
+`login --url` takes any base URL; it is persisted to the config file so subsequent commands don't need it again.
+
+```bash
+# Local dev backend
+kscli login --api-key sk-user-... --url http://localhost:8000
+
+# Production
+kscli login --api-key sk-user-... --url https://api.knowledgestack.ai
+```
+
+To hit a different base URL for a single command, pass `--base-url` on the root group:
+
+```bash
+kscli --base-url http://localhost:8000 folders list
 ```
 
 ## TLS / SSL
 
-For environments using self-signed certificates or corporate proxies:
+`login` auto-enables TLS verification when the URL is `https://`. For self-signed certs or corporate proxies:
 
 ```bash
-# Use a custom CA bundle
+# Custom CA bundle
 export KSCLI_CA_BUNDLE=/path/to/ca-bundle.crt
 
-# Disable SSL verification (development only)
+# Disable verification (dev only!)
 export KSCLI_VERIFY_SSL=false
 ```
 
-SSL configuration is resolved in `get_tls_config()` (`src/kscli/config.py:63-83`) and applied when building the API client (`src/kscli/client.py:43-48`).
+See [`src/kscli/config.py::get_tls_config`](../src/kscli/config.py) for the resolution logic.
 
-If SSL verification fails, the CLI prints troubleshooting steps (`src/kscli/client.py:88-98`):
+If verification fails, `kscli` prints troubleshooting steps:
 
 ```
 Error: SSL certificate verification failed.
@@ -145,3 +150,22 @@ Solutions:
 2. Set KSCLI_CA_BUNDLE to your custom CA bundle path
 3. (Insecure) Set KSCLI_VERIFY_SSL=false for development
 ```
+
+## Exit codes
+
+| Situation | Exit | Message |
+|---|---|---|
+| Success | `0` | — |
+| Auth failure (401) | `2` | `Session expired. Run: kscli login --api-key <key>` |
+| Not found (404) | `3` | `<resource> not found` |
+| Validation error (422) | `4` | Echoes the FastAPI validation body |
+| Any other failure | `1` | Generic error message |
+
+These come from `handle_client_errors()` in [`src/kscli/client.py`](../src/kscli/client.py).
+
+## Security notes
+
+- Treat a key like a password — it carries **all** permissions your user has.
+- Prefer one key per machine (or per CI runner). Revoke them individually when a device is decommissioned.
+- Never commit `/tmp/kscli/.credentials` or `~/.config/kscli/config.json`.
+- For CI, inject the key via secrets (`KSCLI_API_KEY` environment variable, then `kscli login --api-key "$KSCLI_API_KEY"`).
