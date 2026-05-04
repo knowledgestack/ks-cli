@@ -175,7 +175,7 @@ kscli folders list -f yaml             # config-friendly
 
 | Env var | Default | Purpose |
 |---|---|---|
-| `KSCLI_BASE_URL` | `https://api-staging.knowledgestack.ai` | API endpoint |
+| `KSCLI_BASE_URL` | `https://api.knowledgestack.ai` | API endpoint |
 | `KSCLI_FORMAT` | `table` | Default output format |
 | `KSCLI_VERIFY_SSL` | `true` | TLS verification |
 | `KSCLI_CONFIG` | `~/.config/kscli/config.json` | Config file |
