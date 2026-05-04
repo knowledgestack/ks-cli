@@ -21,7 +21,7 @@ from kscli.output import print_result
 @click.option(
     "--url",
     default=None,
-    help="API base URL. Defaults to the staging instance.",
+    help="API base URL. Defaults to the production instance.",
 )
 @click.pass_context
 def login(ctx: click.Context, api_key: str, url: str | None) -> None:

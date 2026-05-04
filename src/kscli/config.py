@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 _DEFAULT_CONFIG_PATH = Path.home() / ".config" / "kscli" / "config.json"
-_DEFAULT_BASE_URL = "https://api-staging.knowledgestack.ai"
+_DEFAULT_BASE_URL = "https://api.knowledgestack.ai"
 _DEFAULT_FORMAT = "table"
 
 
