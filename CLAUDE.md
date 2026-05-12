@@ -40,7 +40,7 @@ The CLI uses resource groups as top-level subcommands (e.g. `folders`, `document
 
 Top-level commands outside resource groups: `login`, `logout`, `whoami`, `settings`.
 
-Resource groups: `folders`, `documents`, `document-versions`, `sections`, `chunks`, `tags`, `workflows`, `tenants`, `users`, `permissions`, `invites`, `threads`, `thread-messages`, `chunk-lineages`, `path-parts`.
+Resource groups: `folders`, `documents`, `document-versions`, `sections`, `chunks`, `tags`, `workflows`, `workflow-definitions`, `workflow-memory`, `events`, `tenants`, `users`, `permissions`, `invites`, `threads`, `thread-messages`, `chunk-lineages`, `path-parts`.
 
 ### Resource command modules (`src/kscli/commands/`)
 

@@ -63,8 +63,7 @@ def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
         api = ksapi.ChunksApi(api_client)
         metadata = json.loads(meta) if meta else None
         chunk_metadata = (
-            ksapi.ChunkMetadataInput.from_dict(metadata or {})
-            or ksapi.ChunkMetadataInput()
+            ksapi.ChunkMetadata.from_dict(metadata or {}) or ksapi.ChunkMetadata()
         )
         result = api.create_chunk(
             ksapi.CreateChunkRequest(
@@ -88,8 +87,7 @@ def update_chunk(ctx, chunk_id, meta):
         api = ksapi.ChunksApi(api_client)
         metadata = json.loads(meta) if meta else None
         chunk_metadata = (
-            ksapi.ChunkMetadataInput.from_dict(metadata or {})
-            or ksapi.ChunkMetadataInput()
+            ksapi.ChunkMetadata.from_dict(metadata or {}) or ksapi.ChunkMetadata()
         )
         result = api.update_chunk_metadata(
             chunk_id,
