@@ -7,6 +7,10 @@ import ksapi
 
 from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
+from kscli.utils.checkout import (
+    resolve_document_path_part_id,
+    with_document_checkout,
+)
 
 COLUMNS = ["id", "name", "type", "origin", "parent_path_part_id", "created_at"]
 
@@ -98,18 +102,20 @@ def create_document(ctx, name, parent_path_part_id, doc_type, origin):
 @click.option("--active-version-id", type=click.UUID, default=None)
 @click.pass_context
 def update_document(ctx, document_id, name, parent_path_part_id, active_version_id):
-    """Update a document."""
+    """Update a document. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_document_path_part_id(api_client, document_id)
         api = ksapi.DocumentsApi(api_client)
-        result = api.update_document(
-            document_id,
-            ksapi.UpdateDocumentRequest(
-                name=name,
-                parent_path_part_id=parent_path_part_id,
-                active_version_id=active_version_id,
-            ),
-        )
+        with with_document_checkout(api_client, doc_path_part_id):
+            result = api.update_document(
+                document_id,
+                ksapi.UpdateDocumentRequest(
+                    name=name,
+                    parent_path_part_id=parent_path_part_id,
+                    active_version_id=active_version_id,
+                ),
+            )
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -117,11 +123,13 @@ def update_document(ctx, document_id, name, parent_path_part_id, active_version_
 @click.argument("document_id", type=click.UUID)
 @click.pass_context
 def delete_document(ctx, document_id):
-    """Delete a document."""
+    """Delete a document. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_document_path_part_id(api_client, document_id)
         api = ksapi.DocumentsApi(api_client)
-        api.delete_document(document_id)
+        with with_document_checkout(api_client, doc_path_part_id):
+            api.delete_document(document_id)
         click.echo(f"Deleted document {document_id}")
 
 
