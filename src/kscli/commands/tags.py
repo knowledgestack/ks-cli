@@ -96,9 +96,13 @@ def attach_tag(ctx, tag_id, path_part_id):
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.PathPartsApi(api_client)
-        result = api.bulk_add_path_part_tags(
+        current = api.get_path_part_tags(path_part_id, include_inherited=False)
+        existing_ids = [t.id for t in current.tags]
+        if tag_id not in existing_ids:
+            existing_ids.append(tag_id)
+        result = api.set_path_part_tags(
             path_part_id,
-            ksapi.BulkTagRequest(tag_ids=[tag_id]),
+            ksapi.BulkTagRequest(tag_ids=existing_ids),
         )
         print_result(ctx, result.model_dump(mode="json"))
 

@@ -7,6 +7,10 @@ import ksapi
 
 from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
+from kscli.utils.checkout import (
+    resolve_ancestor_document_path_part_id,
+    with_document_checkout,
+)
 
 _SEARCH_FILTER_KEYS = {
     "model",
@@ -52,7 +56,7 @@ def describe_chunk(ctx, chunk_id):
 @click.option("--metadata", "meta", default=None, help="JSON string of metadata")
 @click.pass_context
 def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
-    """Create a chunk."""
+    """Create a chunk. Acquires a document checkout for the duration."""
     if version_id is not None and section_id is not None:
         raise click.UsageError("Provide only one of --version-id or --section-id")
     parent_path_id = version_id or section_id
@@ -60,20 +64,23 @@ def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
         raise click.UsageError("Provide either --version-id or --section-id")
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_ancestor_document_path_part_id(
+            api_client, parent_path_id
+        )
         api = ksapi.ChunksApi(api_client)
         metadata = json.loads(meta) if meta else None
         chunk_metadata = (
-            ksapi.ChunkMetadataInput.from_dict(metadata or {})
-            or ksapi.ChunkMetadataInput()
+            ksapi.ChunkMetadata.from_dict(metadata or {}) or ksapi.ChunkMetadata()
         )
-        result = api.create_chunk(
-            ksapi.CreateChunkRequest(
-                parent_path_id=parent_path_id,
-                content=content,
-                chunk_type=chunk_type,
-                chunk_metadata=chunk_metadata,
+        with with_document_checkout(api_client, doc_path_part_id):
+            result = api.create_chunk(
+                ksapi.CreateChunkRequest(
+                    parent_path_id=parent_path_id,
+                    content=content,
+                    chunk_type=chunk_type,
+                    chunk_metadata=chunk_metadata,
+                )
             )
-        )
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -82,19 +89,23 @@ def create_chunk(ctx, content, version_id, section_id, chunk_type, meta):
 @click.option("--metadata", "meta", default=None, help="JSON string of metadata")
 @click.pass_context
 def update_chunk(ctx, chunk_id, meta):
-    """Update chunk metadata."""
+    """Update chunk metadata. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
+        chunk = api.get_chunk(chunk_id)
+        doc_path_part_id = resolve_ancestor_document_path_part_id(
+            api_client, chunk.path_part_id
+        )
         metadata = json.loads(meta) if meta else None
         chunk_metadata = (
-            ksapi.ChunkMetadataInput.from_dict(metadata or {})
-            or ksapi.ChunkMetadataInput()
+            ksapi.ChunkMetadata.from_dict(metadata or {}) or ksapi.ChunkMetadata()
         )
-        result = api.update_chunk_metadata(
-            chunk_id,
-            ksapi.UpdateChunkMetadataRequest(chunk_metadata=chunk_metadata),
-        )
+        with with_document_checkout(api_client, doc_path_part_id):
+            result = api.update_chunk_metadata(
+                chunk_id,
+                ksapi.UpdateChunkMetadataRequest(chunk_metadata=chunk_metadata),
+            )
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -103,14 +114,19 @@ def update_chunk(ctx, chunk_id, meta):
 @click.option("--content", required=True)
 @click.pass_context
 def update_chunk_content(ctx, chunk_id, content):
-    """Update chunk content."""
+    """Update chunk content. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
-        result = api.update_chunk_content(
-            chunk_id,
-            ksapi.UpdateChunkContentRequest(content=content),
+        chunk = api.get_chunk(chunk_id)
+        doc_path_part_id = resolve_ancestor_document_path_part_id(
+            api_client, chunk.path_part_id
         )
+        with with_document_checkout(api_client, doc_path_part_id):
+            result = api.update_chunk_content(
+                chunk_id,
+                ksapi.UpdateChunkContentRequest(content=content),
+            )
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -118,11 +134,16 @@ def update_chunk_content(ctx, chunk_id, content):
 @click.argument("chunk_id", type=click.UUID)
 @click.pass_context
 def delete_chunk(ctx, chunk_id):
-    """Delete a chunk."""
+    """Delete a chunk. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
         api = ksapi.ChunksApi(api_client)
-        api.delete_chunk(chunk_id)
+        chunk = api.get_chunk(chunk_id)
+        doc_path_part_id = resolve_ancestor_document_path_part_id(
+            api_client, chunk.path_part_id
+        )
+        with with_document_checkout(api_client, doc_path_part_id):
+            api.delete_chunk(chunk_id)
         click.echo(f"Deleted chunk {chunk_id}")
 
 

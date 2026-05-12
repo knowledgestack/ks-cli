@@ -11,6 +11,7 @@ from kscli.commands.chunk_lineages import chunk_lineages
 from kscli.commands.chunks import chunks
 from kscli.commands.document_versions import document_versions
 from kscli.commands.documents import documents
+from kscli.commands.events import events
 from kscli.commands.folders import folders
 from kscli.commands.invites import invites
 from kscli.commands.path_parts import path_parts
@@ -21,6 +22,8 @@ from kscli.commands.tenants import tenants
 from kscli.commands.thread_messages import thread_messages
 from kscli.commands.threads import threads
 from kscli.commands.users import users
+from kscli.commands.workflow_definitions import workflow_definitions
+from kscli.commands.workflow_memory import workflow_memory
 from kscli.commands.workflows import workflows
 from kscli.config import ensure_config, get_default_format
 
@@ -133,6 +136,9 @@ main.add_command(sections)
 main.add_command(chunks)
 main.add_command(tags)
 main.add_command(workflows)
+main.add_command(workflow_definitions)
+main.add_command(workflow_memory)
+main.add_command(events)
 main.add_command(tenants)
 main.add_command(users)
 main.add_command(permissions)

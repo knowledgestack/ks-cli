@@ -5,6 +5,11 @@ import ksapi
 
 from kscli.client import get_api_client, handle_client_errors
 from kscli.output import print_result
+from kscli.utils.checkout import (
+    resolve_document_path_part_id,
+    resolve_version_document_path_part_id,
+    with_document_checkout,
+)
 
 COLUMNS = ["id", "document_id", "name", "created_at"]
 
@@ -75,11 +80,13 @@ def version_contents(ctx, version_id, show_content, sections_only):
 @click.option("--document-id", type=click.UUID, required=True)
 @click.pass_context
 def create_version(ctx, document_id):
-    """Create a new version."""
+    """Create a new version. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_document_path_part_id(api_client, document_id)
         api = ksapi.DocumentVersionsApi(api_client)
-        result = api.create_document_version(document_id=document_id)
+        with with_document_checkout(api_client, doc_path_part_id):
+            result = api.create_document_version(document_id=document_id)
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -88,14 +95,16 @@ def create_version(ctx, document_id):
 @click.option("--source-s3", default=None)
 @click.pass_context
 def update_version(ctx, version_id, source_s3):
-    """Update version metadata."""
+    """Update version metadata. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_version_document_path_part_id(api_client, version_id)
         api = ksapi.DocumentVersionsApi(api_client)
-        result = api.update_document_version_metadata(
-            version_id,
-            ksapi.DocumentVersionMetadataUpdate(source_s3=source_s3),
-        )
+        with with_document_checkout(api_client, doc_path_part_id):
+            result = api.update_document_version_metadata(
+                version_id,
+                ksapi.DocumentVersionMetadataUpdate(source_s3=source_s3),
+            )
         print_result(ctx, result.model_dump(mode="json"))
 
 
@@ -103,11 +112,13 @@ def update_version(ctx, version_id, source_s3):
 @click.argument("version_id", type=click.UUID)
 @click.pass_context
 def delete_version(ctx, version_id):
-    """Delete a version."""
+    """Delete a version. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_version_document_path_part_id(api_client, version_id)
         api = ksapi.DocumentVersionsApi(api_client)
-        api.delete_document_version(version_id)
+        with with_document_checkout(api_client, doc_path_part_id):
+            api.delete_document_version(version_id)
         click.echo(f"Deleted version {version_id}")
 
 
@@ -115,9 +126,11 @@ def delete_version(ctx, version_id):
 @click.argument("version_id", type=click.UUID)
 @click.pass_context
 def clear_version_contents(ctx, version_id):
-    """Clear all contents under a version."""
+    """Clear all contents under a version. Acquires a document checkout for the duration."""
     api_client = get_api_client(ctx)
     with handle_client_errors():
+        doc_path_part_id = resolve_version_document_path_part_id(api_client, version_id)
         api = ksapi.DocumentVersionsApi(api_client)
-        api.clear_document_version_contents(version_id)
+        with with_document_checkout(api_client, doc_path_part_id):
+            api.clear_document_version_contents(version_id)
         click.echo(f"Cleared contents of version {version_id}")
